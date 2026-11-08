@@ -6,7 +6,7 @@ const SURVEY_STORAGE_KEY = 'wisn_stung_trang_survey_config_v7';
 const RESPONSES_STORAGE_KEY = 'wisn_stung_trang_responses_v7';
 const HO2_STORAGE_KEY = 'wisn_stung_trang_ho2_indicators_v1';
 const USERS_STORAGE_KEY = 'wisn_stung_trang_auth_users_v1';
-const CURRENT_USER_STORAGE_KEY = 'wisn_stung_trang_current_user_v1';
+const CURRENT_USER_STORAGE_KEY = 'wisn_stung_trang_current_user_v2';
 
 export const defaultUsers: UserAccount[] = [
   {
@@ -227,7 +227,11 @@ export const saveUsers = (users: UserAccount[]): void => {
 
 export const getCurrentUser = (): UserAccount | null => {
   try {
-    const raw = localStorage.getItem(CURRENT_USER_STORAGE_KEY);
+    // Clear legacy auto-admin session from older visits
+    localStorage.removeItem('wisn_stung_trang_current_user_v1');
+    
+    // Check current active session in sessionStorage
+    const raw = sessionStorage.getItem(CURRENT_USER_STORAGE_KEY);
     if (raw) {
       return JSON.parse(raw);
     }
@@ -240,9 +244,11 @@ export const getCurrentUser = (): UserAccount | null => {
 
 export const setCurrentUser = (user: UserAccount | null): void => {
   if (!user) {
+    sessionStorage.removeItem(CURRENT_USER_STORAGE_KEY);
     localStorage.removeItem(CURRENT_USER_STORAGE_KEY);
+    localStorage.removeItem('wisn_stung_trang_current_user_v1');
   } else {
-    localStorage.setItem(CURRENT_USER_STORAGE_KEY, JSON.stringify(user));
+    sessionStorage.setItem(CURRENT_USER_STORAGE_KEY, JSON.stringify(user));
   }
 };
 
@@ -279,7 +285,9 @@ export const registerUser = (userData: Omit<UserAccount, 'id' | 'createdAt'>): {
 };
 
 export const logoutUser = (): void => {
+  sessionStorage.removeItem(CURRENT_USER_STORAGE_KEY);
   localStorage.removeItem(CURRENT_USER_STORAGE_KEY);
+  localStorage.removeItem('wisn_stung_trang_current_user_v1');
 };
 
 // ==========================================
