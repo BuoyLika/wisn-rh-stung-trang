@@ -1,0 +1,202 @@
+import { Language } from '../types';
+
+export const translations = {
+  km: {
+    appTitle: 'ប្រព័ន្ធស្រាវជ្រាវ WISN - មន្ទីរពេទ្យបង្អែក ហ៊ុន សែន ស្ទឹងត្រង់',
+    subtitle: 'ការសិក្សាអំពីតម្រូវការធនធានមនុស្សសុខាភិបាល ដោយប្រើវិធីសាស្ត្រ WISN (WHO / NIPH)',
+    navSurvey: 'កម្រងសំណួរ (Survey)',
+    navWisn: 'គណនា WISN (Staffing Gap)',
+    navBuilder: 'ទម្រង់សំណួរ (Form Builder)',
+    navAnalytics: 'វិភាគទិន្នន័យ (Analytics)',
+    navResponses: 'បញ្ជីចម្លើយ (Responses)',
+    exportBtn: 'ទាញយកទិន្នន័យ (Export)',
+    
+    // Survey View
+    surveyInfoTitle: 'ព័ត៌មាននៃការស្រាវជ្រាវ',
+    researcher: 'អ្នកស្រាវជ្រាវដឹកនាំ',
+    institution: 'ស្ថាប័ន / សាកលវិទ្យាល័យ',
+    objective: 'គោលបំណងនៃការស្រាវជ្រាវ',
+    ethicalNotice: 'ការយល់ព្រម និងសីលធម៌នៃការស្រាវជ្រាវ',
+    ethicalConsentCheckbox: 'ខ្ញុំបានអាន និងយល់ព្រមចូលរួមដោយស្ម័គ្រចិត្តក្នុងការស្រាវជ្រាវនេះ',
+    startSurvey: 'ចាប់ផ្តើមឆ្លើយសំណួរ',
+    nextSection: 'បន្ទាប់',
+    prevSection: 'ត្រឡប់ក្រោយ',
+    submitSurvey: 'ផ្ញើចម្លើយកម្រងសំណួរ',
+    sectionProgress: 'ផ្នែកទី {current} នៃ {total}',
+    requiredField: 'ចាំបាច់',
+    validationError: 'សូមបំពេញរាល់សំណួរដែលចាំបាច់ទាំងអស់មុននឹងបន្ត!',
+    thankYouTitle: 'សូមអរគុណសម្រាប់ការចូលរួម!',
+    thankYouDesc: 'ចម្លើយរបស់អ្នកត្រូវបានកត់ត្រាទុកដោយជោគជ័យ និងរក្សាការសម្ងាត់យ៉ាងតឹងរ៉ឹងសម្រាប់តែគោលបំណងស្រាវជ្រាវប៉ុណ្ណោះ។',
+    submitAnother: 'ឆ្លើយកម្រងសំណួរម្តងទៀត',
+    viewAnalytics: 'មើលផ្ទាំងវិភាគទិន្នន័យ',
+    
+    // Likert Scales
+    likert1: 'មិនយល់ស្របទាំងស្រុង (1)',
+    likert2: 'មិនយល់ស្រប (2)',
+    likert3: 'មធ្យម / មិនច្បាស់ (3)',
+    likert4: 'យល់ស្រប (4)',
+    likert5: 'យល់ស្របទាំងស្រុង (5)',
+
+    // Form Builder
+    builderTitle: 'ប្រព័ន្ធបង្កើត និងកែសម្រួលកម្រងសំណួរ',
+    builderDesc: 'រៀបចំផ្នែកសំណួរ បន្ថែមប្រភេទសំណួរផ្សេងៗ (Likert, MCQ, Text) តាមតម្រូវការស្រាវជ្រាវរបស់អ្នក',
+    addSection: 'បន្ថែមផ្នែកថ្មី',
+    addQuestion: 'បន្ថែមសំណួរថ្មី',
+    questionTitleKm: 'ចំណងជើងសំណួរ (ភាសាខ្មែរ)',
+    questionTitleEn: 'ចំណងជើងសំណួរ (English)',
+    questionType: 'ប្រភេទសំណួរ',
+    optionsLabel: 'ជម្រើសចម្លើយ',
+    addOption: 'បន្ថែមជម្រើស',
+    isRequired: 'តម្រូវឱ្យឆ្លើយ (Required)',
+    saveSurvey: 'រក្សាទុកកម្រងសំណួរ',
+    resetDefaultSurvey: 'កំណត់ឡើងវិញដូចដើម (Sample Survey)',
+    confirmReset: 'តើអ្នកពិតជាចង់កំណត់កម្រងសំណួរឡើងវិញទៅគំរូដើមឬ?',
+    deleteQuestion: 'លុបសំណួរ',
+    deleteSection: 'លុបផ្នែកនេះ',
+    editSurveyDetails: 'កែសម្រួលព័ត៌មានទូទៅនៃការស្រាវជ្រាវ',
+
+    // Question Types
+    typeText: 'អត្ថបទខ្លី (Short Text)',
+    typeTextarea: 'អត្ថបទវែង (Long Text / Paragraph)',
+    typeSingleChoice: 'រើសចម្លើយមួយ (Single Choice)',
+    typeMultipleChoice: 'រើសចម្លើយច្រើន (Multiple Choice)',
+    typeLikert5: 'មាត្រដ្ឋានលីខឺត ៥ កម្រិត (5-Point Likert Scale)',
+    typeRatingStars: 'ការវាយតម្លៃផ្កាយ (Rating 1-5)',
+    typeNumber: 'តួលេខ (Number / Age)',
+
+    // Analytics Dashboard
+    analyticsTitle: 'ផ្ទាំងគ្រប់គ្រង និងវិភាគទិន្នន័យស្រាវជ្រាវ',
+    totalResponses: 'ចំនួនអ្នកចូលរួមសរុប (N)',
+    completionRate: 'អត្រាឆ្លើយចប់ (Completion Rate)',
+    avgTime: 'រយៈពេលមធ្យមក្នុងការឆ្លើយ',
+    summaryByType: 'ស្ថិតិសង្ខេបតាមសំណួរនីមួយៗ',
+    mean: 'មធ្យមភាគ (Mean)',
+    stdDev: 'គម្លាតស្តង់ដារ (SD)',
+    frequencies: 'ប្រេកង់ចម្លើយ (Frequencies & Percentages)',
+    noResponsesYet: 'មិនទាន់មានទិន្នន័យឆ្លើយតបនៅឡើយទេ។ សូមបំពេញកម្រងសំណួរ ឬទាញយកទិន្នន័យគំរូ (Sample Data) ដើម្បីមើលការវិភាគ។',
+    loadMockData: 'បញ្ចូលទិន្នន័យគំរូ (Load 25 Mock Responses)',
+    clearResponses: 'លុបទិន្នន័យចម្លើយទាំងអស់',
+    confirmClearResponses: 'តើអ្នកចង់លុបទិន្នន័យចម្លើយទាំងអស់ឬ?',
+
+    // Responses Table
+    responsesTitle: 'បញ្ជីទិន្នន័យចម្លើយលម្អិត (Raw Dataset)',
+    responseId: 'លេខកូដសម្គាល់',
+    submittedTime: 'កាលបរិច្ឆេទបញ្ជូន',
+    duration: 'រយៈពេលឆ្លើយ',
+    actions: 'សកម្មភាព',
+    viewDetails: 'មើលលម្អិត',
+    searchPlaceholder: 'ស្វែងរកតាមលេខកូដ ឬចម្លើយ...',
+
+    // Export Modal
+    exportModalTitle: 'ទាញយកទិន្នន័យស្រាវជ្រាវ (Data Export)',
+    exportExcel: 'ទាញយកជា Excel (.xlsx)',
+    exportExcelDesc: 'មានច្រើនសន្លឹក (Data Sheet, Codebook, Metadata) ងាយស្រួលធ្វើរបាយការណ៍',
+    exportCsv: 'ទាញយកជា CSV (SPSS / R / Python)',
+    exportCsvDesc: 'ទ្រង់ទ្រាយ UTF-8 គាំទ្រអក្សរខ្មែរ និងអាចបម្លែងជា Numerical Codes សម្រាប់វិភាគស្ថិតិ',
+    exportJson: 'ទាញយកជា JSON (.json)',
+    exportJsonDesc: 'សម្រាប់អ្នកអភិវឌ្ឍន៍ ឬប្រព័ន្ធ API',
+    close: 'បិទ',
+    successExport: 'ទាញយកទិន្នន័យដោយជោគជ័យ!',
+  },
+  en: {
+    appTitle: 'WISN Workforce Assessment - RH Stung Trang',
+    subtitle: 'WHO Workload Indicators of Staffing Need Platform (NIPH / MoH)',
+    navSurvey: 'WISN Survey',
+    navWisn: 'WISN Calculator',
+    navBuilder: 'Form Builder',
+    navAnalytics: 'Analytics',
+    navResponses: 'Responses',
+    exportBtn: 'Export Data',
+    
+    // Survey View
+    surveyInfoTitle: 'Research Study Information',
+    researcher: 'Principal Investigator',
+    institution: 'Institution / University',
+    objective: 'Research Objectives',
+    ethicalNotice: 'Informed Consent & Ethics Notice',
+    ethicalConsentCheckbox: 'I have read and consent to voluntarily participate in this research study.',
+    startSurvey: 'Begin Questionnaire',
+    nextSection: 'Next',
+    prevSection: 'Back',
+    submitSurvey: 'Submit Survey',
+    sectionProgress: 'Section {current} of {total}',
+    requiredField: 'Required',
+    validationError: 'Please answer all required questions before proceeding!',
+    thankYouTitle: 'Thank You for Your Participation!',
+    thankYouDesc: 'Your responses have been successfully recorded and will be strictly kept confidential for academic research purposes.',
+    submitAnother: 'Submit Another Response',
+    viewAnalytics: 'View Analytics Dashboard',
+    
+    // Likert Scales
+    likert1: 'Strongly Disagree (1)',
+    likert2: 'Disagree (2)',
+    likert3: 'Neutral / Undecided (3)',
+    likert4: 'Agree (4)',
+    likert5: 'Strongly Agree (5)',
+
+    // Form Builder
+    builderTitle: 'Questionnaire Instrument Builder',
+    builderDesc: 'Design sections, customize question types (Likert, MCQ, text), and tailor measurement scales for your research needs',
+    addSection: 'Add New Section',
+    addQuestion: 'Add New Question',
+    questionTitleKm: 'Question Title (Khmer)',
+    questionTitleEn: 'Question Title (English)',
+    questionType: 'Question Type',
+    optionsLabel: 'Answer Options',
+    addOption: 'Add Option',
+    isRequired: 'Mandatory / Required',
+    saveSurvey: 'Save Instrument',
+    resetDefaultSurvey: 'Reset to Sample Survey',
+    confirmReset: 'Are you sure you want to reset the questionnaire to the default template?',
+    deleteQuestion: 'Delete Question',
+    deleteSection: 'Delete Section',
+    editSurveyDetails: 'Edit Study Metadata',
+
+    // Question Types
+    typeText: 'Short Text',
+    typeTextarea: 'Long Text / Qualitative Paragraph',
+    typeSingleChoice: 'Single Choice (Radio)',
+    typeMultipleChoice: 'Multiple Choice (Checkboxes)',
+    typeLikert5: '5-Point Likert Scale (Attitude Measurement)',
+    typeRatingStars: 'Star Rating (1-5)',
+    typeNumber: 'Numeric Input (Age/Years)',
+
+    // Analytics Dashboard
+    analyticsTitle: 'Research Data Analytics & Visualization',
+    totalResponses: 'Total Respondents (N)',
+    completionRate: 'Completion Rate',
+    avgTime: 'Avg. Completion Time',
+    summaryByType: 'Item Analysis & Statistical Breakdown',
+    mean: 'Mean (M)',
+    stdDev: 'Std Deviation (SD)',
+    frequencies: 'Frequencies & Percentages',
+    noResponsesYet: 'No responses recorded yet. Fill out the survey or load mock responses to test analytics.',
+    loadMockData: 'Load Sample Data (25 Mock Responses)',
+    clearResponses: 'Clear All Responses',
+    confirmClearResponses: 'Are you sure you want to wipe all collected responses?',
+
+    // Responses Table
+    responsesTitle: 'Raw Response Dataset',
+    responseId: 'Respondent ID',
+    submittedTime: 'Submitted Timestamp',
+    duration: 'Duration',
+    actions: 'Actions',
+    viewDetails: 'View Details',
+    searchPlaceholder: 'Search by ID or response value...',
+
+    // Export Modal
+    exportModalTitle: 'Export Research Dataset',
+    exportExcel: 'Export to Excel (.xlsx)',
+    exportExcelDesc: 'Multi-sheet workbook containing Data Sheet, Codebook & Metadata',
+    exportCsv: 'Export to CSV (SPSS / R / Python)',
+    exportCsvDesc: 'UTF-8 with BOM format, numerical encoding ready for SPSS, R, Stata',
+    exportJson: 'Export to JSON (.json)',
+    exportJsonDesc: 'Structured data format for custom APIs & data pipelines',
+    close: 'Close',
+    successExport: 'Dataset successfully exported!',
+  }
+};
+
+export const useTranslation = (lang: Language) => {
+  return translations[lang];
+};
