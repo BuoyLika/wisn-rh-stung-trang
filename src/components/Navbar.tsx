@@ -12,7 +12,9 @@ import {
   Calculator,
   User,
   ShieldCheck,
-  Tablet
+  Tablet,
+  LogIn,
+  LogOut
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -22,9 +24,10 @@ interface NavbarProps {
   setLanguage: (lang: Language) => void;
   responseCount: number;
   onOpenExport: () => void;
-  currentUser: UserAccount;
+  currentUser: UserAccount | null;
   onOpenAuth: () => void;
   onOpenSync: () => void;
+  onLogout: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -37,6 +40,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   currentUser,
   onOpenAuth,
   onOpenSync,
+  onLogout,
 }) => {
   const t = useTranslation(language);
 
@@ -46,7 +50,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'wisn_calculator', label: (t as any).navWisn || 'គណនា WISN', icon: <Calculator className="w-4 h-4" /> },
     { id: 'analytics', label: t.navAnalytics, icon: <BarChart3 className="w-4 h-4" /> },
     { id: 'responses', label: t.navResponses, icon: <ListFilter className="w-4 h-4" />, badge: responseCount },
-    ...(currentUser.role === 'admin'
+    ...(currentUser?.role === 'admin'
       ? [{ id: 'builder' as AppView, label: t.navBuilder, icon: <Settings2 className="w-4 h-4" /> }]
       : []),
   ];
@@ -116,24 +120,44 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
 
             {/* User Account / Login Pill */}
-            <button
-              onClick={onOpenAuth}
-              className={`flex items-center space-x-1.5 px-2.5 py-1.5 text-xs font-bold rounded-lg border transition shadow-2xs ${
-                currentUser.role === 'admin'
-                  ? 'bg-slate-900 border-slate-900 text-teal-400 hover:bg-slate-800'
-                  : 'bg-emerald-50 border-emerald-300 text-emerald-900 hover:bg-emerald-100'
-              }`}
-              title="គ្រប់គ្រងគណនី / ចូលប្រើប្រព័ន្ធ"
-            >
-              {currentUser.role === 'admin' ? (
-                <ShieldCheck className="w-3.5 h-3.5 text-teal-400" />
-              ) : (
-                <User className="w-3.5 h-3.5 text-emerald-700" />
-              )}
-              <span className="max-w-[120px] truncate">
-                {currentUser.role === 'admin' ? 'Admin' : currentUser.interviewerCode}
-              </span>
-            </button>
+            {currentUser ? (
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={onOpenAuth}
+                  className={`flex items-center space-x-1.5 px-2.5 py-1.5 text-xs font-bold rounded-lg border transition shadow-2xs ${
+                    currentUser.role === 'admin'
+                      ? 'bg-slate-900 border-slate-900 text-teal-400 hover:bg-slate-800'
+                      : 'bg-emerald-50 border-emerald-300 text-emerald-900 hover:bg-emerald-100'
+                  }`}
+                  title="ប្តូរគណនី / មើលព័ត៌មាន (Switch Account)"
+                >
+                  {currentUser.role === 'admin' ? (
+                    <ShieldCheck className="w-3.5 h-3.5 text-teal-400" />
+                  ) : (
+                    <User className="w-3.5 h-3.5 text-emerald-700" />
+                  )}
+                  <span className="max-w-[120px] truncate">
+                    {currentUser.role === 'admin' ? 'Admin' : currentUser.interviewerCode}
+                  </span>
+                </button>
+                <button
+                  onClick={onLogout}
+                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg border border-transparent hover:border-rose-200 transition"
+                  title="ចាកចេញ (Logout)"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={onOpenAuth}
+                className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-teal-600 hover:bg-teal-500 text-white shadow-sm transition animate-pulse"
+                title="ចូលប្រើប្រព័ន្ធ (Login)"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                <span>ចូលប្រើ (Login)</span>
+              </button>
+            )}
 
             {/* Language Switcher */}
             <button

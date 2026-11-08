@@ -10,7 +10,8 @@ import {
   deleteResponse,
   clearAllResponses, 
   seedMockResponses,
-  getCurrentUser
+  getCurrentUser,
+  logoutUser
 } from './utils/storage';
 import { Navbar } from './components/Navbar';
 import { RespondentView } from './components/RespondentView';
@@ -30,9 +31,15 @@ export const App: React.FC = () => {
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   // Authentication & Multi-Device Sync state
-  const [currentUser, setCurrentUser] = useState<UserAccount>(getCurrentUser);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<UserAccount | null>(getCurrentUser);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(() => !getCurrentUser());
   const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
+
+  const handleLogout = () => {
+    logoutUser();
+    setCurrentUser(null);
+    setIsAuthModalOpen(true);
+  };
 
   // Force upgrade if browser has outdated survey schema cached
   useEffect(() => {
@@ -98,6 +105,7 @@ export const App: React.FC = () => {
         currentUser={currentUser}
         onOpenAuth={() => setIsAuthModalOpen(true)}
         onOpenSync={() => setIsSyncModalOpen(true)}
+        onLogout={handleLogout}
       />
 
       {/* Main Content Area */}
@@ -177,9 +185,16 @@ export const App: React.FC = () => {
       {/* Auth / Register Modal */}
       <AuthModal
         isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
+        onClose={() => {
+          if (currentUser) {
+            setIsAuthModalOpen(false);
+          }
+        }}
         currentUser={currentUser}
-        onLoginSuccess={(user) => setCurrentUser(user)}
+        onLoginSuccess={(user) => {
+          setCurrentUser(user);
+          setIsAuthModalOpen(false);
+        }}
       />
 
       {/* Multi-Device Data Sync Modal */}

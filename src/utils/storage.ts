@@ -225,20 +225,16 @@ export const saveUsers = (users: UserAccount[]): void => {
   }
 };
 
-export const getCurrentUser = (): UserAccount => {
+export const getCurrentUser = (): UserAccount | null => {
   try {
     const raw = localStorage.getItem(CURRENT_USER_STORAGE_KEY);
     if (raw) {
       return JSON.parse(raw);
     }
-    // Default to admin
-    const users = getSavedUsers();
-    const admin = users.find((u) => u.role === 'admin') || defaultUsers[0];
-    localStorage.setItem(CURRENT_USER_STORAGE_KEY, JSON.stringify(admin));
-    return admin;
+    return null;
   } catch (err) {
     console.error('Failed to load current user:', err);
-    return defaultUsers[0];
+    return null;
   }
 };
 
@@ -283,10 +279,7 @@ export const registerUser = (userData: Omit<UserAccount, 'id' | 'createdAt'>): {
 };
 
 export const logoutUser = (): void => {
-  // Reset to default interviewer or null
-  const users = getSavedUsers();
-  const interviewer = users.find((u) => u.role === 'interviewer') || defaultUsers[1];
-  setCurrentUser(interviewer);
+  localStorage.removeItem(CURRENT_USER_STORAGE_KEY);
 };
 
 // ==========================================

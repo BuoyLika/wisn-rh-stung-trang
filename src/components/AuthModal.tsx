@@ -16,7 +16,7 @@ import {
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  currentUser: UserAccount;
+  currentUser: UserAccount | null;
   onLoginSuccess: (user: UserAccount) => void;
 }
 
@@ -109,12 +109,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         
         {/* Header */}
         <div className="bg-gradient-to-r from-teal-900 via-teal-800 to-emerald-900 text-white p-6 relative">
-          <button
-            onClick={onClose}
-            className="absolute top-5 right-5 p-1.5 rounded-full hover:bg-white/20 text-white/80 hover:text-white transition"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          {currentUser && (
+            <button
+              onClick={onClose}
+              className="absolute top-5 right-5 p-1.5 rounded-full hover:bg-white/20 text-white/80 hover:text-white transition"
+              title="បិទ (Close)"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-800/80 text-[11px] font-bold text-teal-200 mb-2 border border-teal-700">
             <ShieldCheck className="w-3.5 h-3.5 text-teal-400" />
             <span>ប្រព័ន្ធគ្រប់គ្រងសិទ្ធិ និងអ្នកសម្ភាសន៍ (WISN Auth)</span>
@@ -123,7 +126,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             {activeTab === 'login' ? 'ចូលប្រើប្រព័ន្ធ (Login)' : 'ចុះឈ្មោះអ្នកសម្ភាសន៍ថ្មី (Register)'}
           </h2>
           <p className="text-xs text-teal-200/90 mt-1">
-            គណនីបច្ចុប្បន្ន៖ <strong className="text-white">{currentUser.name}</strong> ({currentUser.role === 'admin' ? '🛡️ Admin' : `📝 អ្នកសម្ភាសន៍ [${currentUser.interviewerCode}]`})
+            {currentUser ? (
+              <>
+                គណនីបច្ចុប្បន្ន៖ <strong className="text-white">{currentUser.name}</strong> ({currentUser.role === 'admin' ? '🛡️ Admin' : `📝 អ្នកសម្ភាសន៍ [${currentUser.interviewerCode}]`})
+              </>
+            ) : (
+              <span className="text-amber-300 font-medium">
+                ⚠️ សូមចូលប្រើប្រព័ន្ធ ឬជ្រើសរើសគណនីអ្នកសម្ភាសន៍ ដើម្បីចាប់ផ្តើម
+              </span>
+            )}
           </p>
         </div>
 
@@ -219,7 +230,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       type="button"
                       onClick={() => handleQuickLogin(u)}
                       className={`p-2.5 rounded-xl border text-left transition flex items-center justify-between ${
-                        currentUser.id === u.id
+                        currentUser?.id === u.id
                           ? 'border-teal-500 bg-teal-50/70 text-teal-900 font-bold'
                           : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700'
                       }`}

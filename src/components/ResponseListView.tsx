@@ -27,7 +27,7 @@ interface ResponseListViewProps {
   language: Language;
   onDeleteResponse: (responseId: string) => void;
   onUpdateResponse: (responseId: string, updated: Partial<SurveyResponse>) => void;
-  currentUser?: UserAccount;
+  currentUser?: UserAccount | null;
   onOpenSync?: () => void;
 }
 
