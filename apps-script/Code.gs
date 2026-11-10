@@ -133,6 +133,8 @@ var ACTIONS = {
    *   a new answer whose staff code already exists goes to Duplicates.
    * mode "import" (admin only, from a backup file): keeps the original interviewer,
    *   skips ids that exist unless overwrite is true, skips duplicate staff codes.
+   * mode "publish" (from the offline HTML file): like "queue", but an admin keeps
+   *   each answer's own interviewer code.
    */
   submit: function (req) {
     var user = auth_(req);
@@ -141,6 +143,7 @@ var ACTIONS = {
     var importMode = req.mode === 'import';
     if (importMode && user.role !== 'admin') throw err_('Admin only', 'forbidden');
     var overwrite = !!req.overwrite;
+    var keepInterviewer = importMode || (req.mode === 'publish' && user.role === 'admin');
 
     return withLock_(function () {
       var t = table_(SH.responses, RESP_COLS);
@@ -156,7 +159,7 @@ var ACTIONS = {
       list.forEach(function (raw) {
         var r = cleanResponse_(raw);
         if (!r) { results.push({ id: raw && raw.id, status: 'invalid' }); return; }
-        if (!importMode) {
+        if (!keepInterviewer) {
           r.interviewerId = user.interviewerCode;
           r.answers.interviewer_id = user.interviewerCode;
         }

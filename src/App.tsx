@@ -20,7 +20,12 @@ import {
   clearUploadProblems,
   getOldLocalResponses,
   queueOldLocalResponses,
+  getOfflineProfile,
+  setOfflineProfile,
 } from './utils/storage';
+import { OFFLINE_MODE } from './config';
+import { OfflineBar } from './components/OfflineBar';
+import { OfflineProfileModal } from './components/OfflineProfileModal';
 import { isApiConfigured, errorText, ApiError } from './utils/api';
 import { Navbar } from './components/Navbar';
 import { RespondentView } from './components/RespondentView';
@@ -84,9 +89,10 @@ export const App: React.FC = () => {
 
   // After login (and on every start): get the shared form + HO2 numbers, then sync answers.
   useEffect(() => {
-    if (!currentUser || !isApiConfigured()) return;
+    if (!currentUser) return;
     setResponses(getSavedResponses());
     setPending(getPendingCount());
+    if (OFFLINE_MODE || !isApiConfigured()) return;
     setProblemCount(getUploadProblems().length);
     let stop = false;
     loadConfig()
@@ -111,7 +117,17 @@ export const App: React.FC = () => {
     saveSurvey(survey);
   }, [survey]);
 
+  const refreshLocal = () => {
+    setResponses(getSavedResponses());
+    setPending(getPendingCount());
+  };
+
   const handleLogout = async () => {
+    if (OFFLINE_MODE) {
+      // offline: only changes who is interviewing; answers stay on the PC
+      setIsAuthModalOpen(true);
+      return;
+    }
     if (getPendingCount() > 0) {
       const ok = confirm(
         language === 'km'
@@ -130,9 +146,14 @@ export const App: React.FC = () => {
   };
 
   const handleSubmitResponse = (newResponse: SurveyResponse) => {
-    setResponses(queueResponse(newResponse));
+    try {
+      setResponses(queueResponse(newResponse));
+    } catch (err: any) {
+      alert(String(err?.message || err));
+      return;
+    }
     setPending(getPendingCount());
-    runSync();
+    if (!OFFLINE_MODE) runSync();
   };
 
   const showError = (err: unknown) => alert(errorText(err));
@@ -221,7 +242,7 @@ export const App: React.FC = () => {
     setProblemCount(0);
   };
 
-  if (!isApiConfigured()) {
+  if (!OFFLINE_MODE && !isApiConfigured()) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 p-6">
         <div className="max-w-md bg-white rounded-2xl border border-amber-300 p-6 text-sm text-slate-700 space-y-2">
@@ -251,7 +272,11 @@ export const App: React.FC = () => {
         onLogout={handleLogout}
       />
 
-      {currentUser && (
+      {currentUser && OFFLINE_MODE && (
+        <OfflineBar language={language} responses={responses} pending={pending} onChanged={refreshLocal} />
+      )}
+
+      {currentUser && !OFFLINE_MODE && (
         <SyncBar
           language={language}
           pending={pending}
@@ -342,7 +367,24 @@ export const App: React.FC = () => {
         language={language}
       />
 
+      {/* Offline file: who is interviewing on this PC */}
+      {OFFLINE_MODE && (
+        <OfflineProfileModal
+          key={currentUser?.interviewerCode || 'none'}
+          isOpen={isAuthModalOpen}
+          current={getOfflineProfile()}
+          onClose={() => currentUser && setIsAuthModalOpen(false)}
+          onSave={(p) => {
+            setOfflineProfile(p);
+            setCurrentUser(getCurrentUser());
+            refreshLocal();
+            setIsAuthModalOpen(false);
+          }}
+        />
+      )}
+
       {/* Login / accounts */}
+      {!OFFLINE_MODE && (
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => {
@@ -357,6 +399,7 @@ export const App: React.FC = () => {
           setIsAuthModalOpen(false);
         }}
       />
+      )}
 
       {/* Backup file / import */}
       <DataSyncModal

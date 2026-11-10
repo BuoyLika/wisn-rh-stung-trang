@@ -2,6 +2,8 @@ import { ResearchSurvey, SurveyResponse, UserAccount, MergeResult } from '../typ
 import { initialSampleSurvey, sampleMockResponses } from '../data/sampleSurvey';
 import { HO2Indicator, defaultHO2Indicators } from '../data/ho2WorkloadData';
 import { apiCall, ApiError } from './api';
+import { OFFLINE_MODE } from '../config';
+import { saveAnswersToFolder } from './pcFolder';
 
 // All answers live in the Google Sheet (see apps-script/Code.gs).
 // This file keeps a copy on the device so the app works without internet:
@@ -46,6 +48,108 @@ function removeKey(key: string): void {
   try { localStorage.removeItem(key); } catch { /* storage blocked */ }
 }
 
+// ---------------------------------------------------------------- offline HTML file (answers kept on the PC)
+
+const OFF_PROFILE = 'wisn_offline_profile_v1';
+const OFF_ANSWERS = 'wisn_offline_answers_v1';
+const OFF_PUBLISHED = 'wisn_offline_published_v1';
+
+export interface OfflineProfile {
+  name: string;
+  interviewerCode: string;
+}
+
+export const getOfflineProfile = (): OfflineProfile | null => readJson<OfflineProfile | null>(OFF_PROFILE, null);
+
+export const setOfflineProfile = (p: OfflineProfile | null): void => {
+  if (p) writeJson(OFF_PROFILE, p);
+  else removeKey(OFF_PROFILE);
+};
+
+const offAnswers = (): SurveyResponse[] => readJson<SurveyResponse[]>(OFF_ANSWERS, []);
+const offPublished = (): Set<string> => new Set(readJson<string[]>(OFF_PUBLISHED, []));
+const setOffPublished = (ids: Set<string>) => writeJson(OFF_PUBLISHED, [...ids]);
+
+/** Unlike writeJson, this one must not fail quietly: the answers live only here. */
+const setOffAnswers = (list: SurveyResponse[]) => {
+  try {
+    localStorage.setItem(OFF_ANSWERS, JSON.stringify(list));
+  } catch {
+    throw new Error(
+      'កន្លែងផ្ទុកក្នុង Browser ពេញ។ សូម Publish ឬ Download ទិន្នន័យ។ (Browser storage is full: publish or download the answers, then remove published ones.)'
+    );
+  }
+  saveAnswersToFolder([], list).catch(() => { /* no folder */ });
+};
+
+const offView = (): SurveyResponse[] => {
+  const pub = offPublished();
+  return offAnswers().map((r) => (pub.has(r.id) ? r : { ...r, syncStatus: 'pending' as const }));
+};
+
+const offUnpublished = (): SurveyResponse[] => {
+  const pub = offPublished();
+  return offAnswers().filter((r) => !pub.has(r.id));
+};
+
+/** Every answer on this PC (for the backup download). */
+export const getAllOfflineAnswers = (): SurveyResponse[] => offAnswers();
+
+export interface PublishResult {
+  total: number;
+  sent: number;
+  held: number;
+  failed: number;
+}
+
+/**
+ * Sends the answers not yet published to the Google Sheet. Log in as an admin to
+ * keep each answer's own interviewer code (an interviewer login stamps their code).
+ */
+export const publishToSheet = async (
+  username: string,
+  password: string,
+  onProgress?: (done: number, total: number) => void
+): Promise<PublishResult> => {
+  const login = await apiCall<{ token: string }>('login', { username, password });
+  const token = login.token;
+  const todo = offUnpublished();
+  const out: PublishResult = { total: todo.length, sent: 0, held: 0, failed: 0 };
+  try {
+    for (let i = 0; i < todo.length; i += 25) {
+      const batch = todo.slice(i, i + 25);
+      const res = await apiCall<{ results: { id: string; status: string }[] }>('submit', { mode: 'publish', responses: batch }, token);
+      const pub = offPublished();
+      res.results.forEach((r) => {
+        if (r.status === 'added' || r.status === 'updated') {
+          pub.add(r.id);
+          out.sent++;
+        } else if (r.status === 'duplicate') {
+          pub.add(r.id); // kept in the Sheet's "Duplicates" tab
+          out.held++;
+        } else {
+          out.failed++;
+        }
+      });
+      setOffPublished(pub);
+      onProgress?.(Math.min(i + 25, todo.length), todo.length);
+    }
+  } finally {
+    apiCall('logout', {}, token).catch(() => { /* fine */ });
+  }
+  return out;
+};
+
+/** Removes answers that are already in the Sheet from this PC (folder copies stay). */
+export const removePublishedFromPC = (): number => {
+  const pub = offPublished();
+  const all = offAnswers();
+  const keep = all.filter((r) => !pub.has(r.id));
+  setOffAnswers(keep);
+  setOffPublished(new Set());
+  return all.length - keep.length;
+};
+
 /** A unique id for a new answer. */
 export const newResponseId = (interviewerCode: string, staffCode: string): string =>
   `RESP-${interviewerCode || 'X'}-${staffCode || '000'}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
@@ -80,6 +184,7 @@ let ho2Timer: ReturnType<typeof setTimeout> | null = null;
 
 /** Downloads the shared survey form and HO2 numbers, and keeps them on the device. */
 export const loadConfig = async (): Promise<{ survey: ResearchSurvey | null; ho2: HO2Indicator[] | null }> => {
+  if (OFFLINE_MODE) return { survey: null, ho2: null };
   const res = await apiCall<{ survey: ResearchSurvey | null; ho2: HO2Indicator[] | null }>('getConfig', {}, getToken());
   const survey = isCompleteSurvey(res.survey) ? res.survey : null;
   if (survey) saveSurvey(survey);
@@ -96,6 +201,7 @@ export const loadConfig = async (): Promise<{ survey: ResearchSurvey | null; ho2
 /** Admin: makes this the survey form for every device. */
 export const saveSurveyRemote = async (survey: ResearchSurvey): Promise<void> => {
   saveSurvey(survey);
+  if (OFFLINE_MODE) return;
   await apiCall('saveConfig', { key: 'survey', value: survey }, getToken());
 };
 
@@ -135,10 +241,16 @@ interface Session {
 
 const getSession = (): Session | null => readJson<Session | null>(SESSION_KEY, null);
 
-export const getToken = (): string | null => getSession()?.token || null;
+export const getToken = (): string | null => (OFFLINE_MODE ? null : getSession()?.token || null);
 
 /** The logged-in user, or null. Kept on the device, so it works offline. */
 export const getCurrentUser = (): UserAccount | null => {
+  if (OFFLINE_MODE) {
+    const p = getOfflineProfile();
+    return p
+      ? { id: 'local-' + p.interviewerCode, username: 'local', name: p.name, role: 'admin', interviewerCode: p.interviewerCode, createdAt: '' }
+      : null;
+  }
   const s = getSession();
   return s?.token ? s.user : null;
 };
@@ -161,6 +273,10 @@ export const loginUser = async (
 
 /** Logs out. Answers still waiting to upload stay on the device for the next login. */
 export const logoutUser = async (): Promise<void> => {
+  if (OFFLINE_MODE) {
+    setOfflineProfile(null);
+    return;
+  }
   const s = getSession();
   if (!s) return;
   removeKey(SESSION_KEY);
@@ -209,7 +325,7 @@ const setOutbox = (list: SurveyResponse[]) => uid() && writeJson(outboxKey(uid()
 const getCache = (): SurveyResponse[] => (uid() ? readJson<SurveyResponse[]>(cacheKey(uid()), []) : []);
 const setCache = (list: SurveyResponse[]) => uid() && writeJson(cacheKey(uid()), list);
 
-export const getPendingCount = (): number => getOutbox().length;
+export const getPendingCount = (): number => (OFFLINE_MODE ? offUnpublished().length : getOutbox().length);
 
 export const getUploadProblems = (): UploadProblem[] => (uid() ? readJson<UploadProblem[]>(problemsKey(uid()), []) : []);
 
@@ -222,6 +338,7 @@ const addProblems = (items: UploadProblem[]) => {
 
 /** What the screens show: answers waiting to upload first, then the Sheet's copy. */
 export const getSavedResponses = (): SurveyResponse[] => {
+  if (OFFLINE_MODE) return offView();
   const outbox = getOutbox().map((r) => ({ ...r, syncStatus: 'pending' as const }));
   const ids = new Set(outbox.map((r) => r.id));
   return [...outbox, ...getCache().filter((r) => !ids.has(r.id))];
@@ -231,6 +348,12 @@ export const getSavedResponses = (): SurveyResponse[] => {
 export const queueResponse = (response: SurveyResponse): SurveyResponse[] => {
   const clean = { ...response };
   delete clean.syncStatus;
+  if (OFFLINE_MODE) {
+    const list = [clean, ...offAnswers().filter((r) => r.id !== clean.id)];
+    setOffAnswers(list);
+    saveAnswersToFolder([clean], list).catch(() => { /* no folder */ });
+    return offView();
+  }
   setOutbox([clean, ...getOutbox().filter((r) => r.id !== clean.id)]);
   return getSavedResponses();
 };
@@ -248,6 +371,9 @@ let syncing: Promise<SyncResult> | null = null;
 
 /** Uploads waiting answers, then downloads the current list. Safe to call often. */
 export const syncNow = (): Promise<SyncResult> => {
+  if (OFFLINE_MODE) {
+    return Promise.resolve({ responses: offView(), uploaded: 0, newProblems: [], pending: getPendingCount() });
+  }
   if (!syncing) syncing = doSync().finally(() => { syncing = null; });
   return syncing;
 };
@@ -296,6 +422,16 @@ const doSync = async (): Promise<SyncResult> => {
 };
 
 export const updateResponse = async (responseId: string, data: Partial<SurveyResponse>): Promise<SurveyResponse[]> => {
+  if (OFFLINE_MODE) {
+    const list = offAnswers().map((r) => (r.id === responseId ? { ...r, ...data, id: r.id, syncStatus: undefined } : r));
+    setOffAnswers(list);
+    const pub = offPublished();
+    pub.delete(responseId); // publish again so the Sheet gets the change
+    setOffPublished(pub);
+    const changed = list.find((r) => r.id === responseId);
+    if (changed) saveAnswersToFolder([changed], list).catch(() => { /* no folder */ });
+    return offView();
+  }
   const outbox = getOutbox();
   if (outbox.some((r) => r.id === responseId)) {
     setOutbox(outbox.map((r) => (r.id === responseId ? { ...r, ...data, id: r.id, syncStatus: undefined } : r)));
@@ -310,6 +446,10 @@ export const updateResponse = async (responseId: string, data: Partial<SurveyRes
 
 /** Waiting answers are removed from the device; uploaded ones go to the Sheet's "Deleted" tab (admin). */
 export const deleteResponse = async (responseId: string): Promise<SurveyResponse[]> => {
+  if (OFFLINE_MODE) {
+    setOffAnswers(offAnswers().filter((r) => r.id !== responseId));
+    return offView();
+  }
   const outbox = getOutbox();
   if (outbox.some((r) => r.id === responseId)) {
     setOutbox(outbox.filter((r) => r.id !== responseId));
@@ -322,6 +462,11 @@ export const deleteResponse = async (responseId: string): Promise<SurveyResponse
 
 /** Admin: moves every answer in the Sheet to its "Deleted" tab. */
 export const clearAllResponses = async (): Promise<SurveyResponse[]> => {
+  if (OFFLINE_MODE) {
+    setOffAnswers([]);
+    setOffPublished(new Set());
+    return [];
+  }
   await apiCall('clearAll', { confirm: 'DELETE ALL' }, getToken());
   setCache([]);
   return getSavedResponses();
@@ -329,6 +474,21 @@ export const clearAllResponses = async (): Promise<SurveyResponse[]> => {
 
 /** Admin: uploads answers from a backup file, keeping who interviewed. */
 export const importResponses = async (incoming: SurveyResponse[], overwrite: boolean): Promise<{ result: MergeResult; responses: SurveyResponse[] }> => {
+  if (OFFLINE_MODE) {
+    const byId = new Map(offAnswers().map((r) => [r.id, r]));
+    let added = 0, updated = 0, skipped = 0;
+    incoming.forEach((r) => {
+      if (!r || !r.id || typeof r.answers !== 'object') { skipped++; return; }
+      const c = { ...r };
+      delete c.syncStatus;
+      if (byId.has(c.id)) {
+        if (overwrite) { byId.set(c.id, c); updated++; } else skipped++;
+      } else { byId.set(c.id, c); added++; }
+    });
+    const list = [...byId.values()].sort((a, b) => String(b.submittedAt).localeCompare(String(a.submittedAt)));
+    setOffAnswers(list);
+    return { result: { added, updated, skipped, totalIncoming: incoming.length, newTotal: list.length }, responses: offView() };
+  }
   const token = getToken();
   let added = 0, updated = 0, skipped = 0;
   for (let i = 0; i < incoming.length; i += 50) {
@@ -359,7 +519,7 @@ const isSampleAnswer = (r: SurveyResponse): boolean =>
 
 /** Real answers that the old version saved only in this browser. */
 export const getOldLocalResponses = (): SurveyResponse[] =>
-  readJson<SurveyResponse[]>(OLD_RESPONSES_KEY, []).filter((r) => r && r.id && !isSampleAnswer(r));
+  OFFLINE_MODE ? [] : readJson<SurveyResponse[]>(OLD_RESPONSES_KEY, []).filter((r) => r && r.id && !isSampleAnswer(r));
 
 /** Puts the old answers in the upload queue (they upload under the logged-in interviewer). */
 export const queueOldLocalResponses = (): number => {

@@ -14,6 +14,8 @@ save on the device first and upload when there is internet.
 
 - Setup (once): [`docs/SETUP_GOOGLE_SHEETS.md`](docs/SETUP_GOOGLE_SHEETS.md), then put the web app URL in `src/config.ts`.
 - Local testing without Google: `npm run mock` and `npm run test:api`.
+- Offline survey as one HTML file (no internet; publish to the Sheet later):
+  `npm run build:offline` → `offline/WISN-Survey-Offline.html`, see [`docs/OFFLINE_SURVEY.md`](docs/OFFLINE_SURVEY.md).
 
 ---
 

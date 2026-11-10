@@ -1,4 +1,5 @@
 import React from 'react';
+import { OFFLINE_MODE } from '../config';
 import { AppView, Language, UserAccount } from '../types';
 import { useTranslation } from '../i18n/translations';
 import { 
@@ -137,7 +138,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <User className="w-3.5 h-3.5 text-emerald-700" />
                   )}
                   <span className="max-w-[120px] truncate">
-                    {currentUser.role === 'admin' ? 'Admin' : currentUser.interviewerCode}
+                    {OFFLINE_MODE || currentUser.role !== 'admin' ? currentUser.interviewerCode : 'Admin'}
                   </span>
                 </button>
                 <button

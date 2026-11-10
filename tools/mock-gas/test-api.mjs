@@ -94,6 +94,15 @@ try {
   check('import skips existing, keeps interviewer', imp.result.results[0].status === 'skipped' && imp.result.results[1].status === 'added', imp);
   check('imported keeps OLD7', (await call('list', {}, A)).result.responses.find((r) => r.id === 'R9').interviewerId === 'OLD7');
 
+  // publish (offline HTML file)
+  const pub = await call('submit', { mode: 'publish', responses: [resp('P1', '501', { interviewerId: 'PC01' }), resp('P2', '009', { interviewerId: 'PC01' })] }, A);
+  check('admin publish keeps PC code, holds dup', pub.result.results[0].status === 'added' && pub.result.results[1].status === 'duplicate', pub);
+  const p1 = (await call('list', {}, A)).result.responses.find((r) => r.id === 'P1');
+  check('published answer keeps PC01', p1 && p1.interviewerId === 'PC01' && p1.answers.interviewer_id === 'FAKE');
+  check('re-publish is safe', (await call('submit', { mode: 'publish', responses: [resp('P1', '501', { interviewerId: 'PC01' })] }, A)).result.results[0].status === 'updated');
+  const kp = await call('submit', { mode: 'publish', responses: [resp('P3', '502', { interviewerId: 'PC01' })] }, K2);
+  check('interviewer publish uses own code', kp.result.results[0].status === 'added');
+
   // config
   check('interviewer cannot save config', (await call('saveConfig', { key: 'survey', value: { a: 1 } }, K1)).code === 'forbidden');
   const bigCfg = { questions: Array.from({ length: 300 }, (_, i) => ({ id: 'q' + i, text: 'y'.repeat(500) })) };
@@ -106,7 +115,7 @@ try {
   check('admin deletes', (await call('remove', { id: 'R2' }, A)).ok);
   check('clearAll needs confirm', (await call('clearAll', {}, A)).code === 'bad_request');
   const ca = await call('clearAll', { confirm: 'DELETE ALL' }, A);
-  check('clearAll moves the rest', ca.ok && ca.result.moved === 3, ca);
+  check('clearAll moves the rest', ca.ok && ca.result.moved === 5, ca);
   check('list empty after clear', (await call('list', {}, A)).result.responses.length === 0);
 
   // accounts

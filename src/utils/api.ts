@@ -1,4 +1,4 @@
-import { SHEETS_API_URL } from '../config';
+import { SHEETS_API_URL, OFFLINE_MODE } from '../config';
 
 export class ApiError extends Error {
   code: string;
@@ -12,7 +12,26 @@ export class ApiError extends Error {
   }
 }
 
-export const isApiConfigured = () => !!SHEETS_API_URL;
+const URL_KEY = 'wisn_sheet_url_v1';
+
+/** The Sheet's web app address. The offline file can keep its own (set in the Publish window). */
+export const getApiUrl = (): string => {
+  if (!OFFLINE_MODE) return SHEETS_API_URL;
+  try {
+    return localStorage.getItem(URL_KEY) || SHEETS_API_URL;
+  } catch {
+    return SHEETS_API_URL;
+  }
+};
+
+export const setApiUrl = (url: string): void => {
+  try {
+    if (url.trim()) localStorage.setItem(URL_KEY, url.trim());
+    else localStorage.removeItem(URL_KEY);
+  } catch { /* storage blocked */ }
+};
+
+export const isApiConfigured = () => !!getApiUrl();
 
 /**
  * Calls the Apps Script web app. The body is sent as text/plain on purpose:
@@ -20,10 +39,11 @@ export const isApiConfigured = () => !!SHEETS_API_URL;
  * does not answer.
  */
 export async function apiCall<T = any>(action: string, payload: Record<string, unknown> = {}, token?: string | null): Promise<T> {
-  if (!SHEETS_API_URL) throw new ApiError('Server address not set', 'not_configured');
+  const url = getApiUrl();
+  if (!url) throw new ApiError('Server address not set', 'not_configured');
   let res: Response;
   try {
-    res = await fetch(SHEETS_API_URL, {
+    res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ action, token: token || undefined, ...payload }),
