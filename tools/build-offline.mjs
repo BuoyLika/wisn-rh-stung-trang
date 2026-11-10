@@ -1,6 +1,6 @@
 // Builds the offline survey as ONE html file that opens straight from disk
 // (double-click, no internet, no server):  npm run build:offline
-// Output: offline/WISN-Survey-Offline.html
+// Output: offline/WISN-Tools-Project-Offline.html
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -8,7 +8,7 @@ import { build } from 'vite';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outDir = path.join(root, 'dist-offline');
-const target = path.join(root, 'offline', 'WISN-Survey-Offline.html');
+const target = path.join(root, 'offline', 'WISN-Tools-Project-Offline.html');
 
 process.env.VITE_OFFLINE = '1';
 await build({

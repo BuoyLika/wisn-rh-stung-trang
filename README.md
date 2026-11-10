@@ -1,4 +1,6 @@
-# 🏥 ប្រព័ន្ធកម្រងសំណួរ និងវិភាគបន្ទុកការងារ WISN - មន្ទីរពេទ្យបង្អែក ហ៊ុន សែន ស្ទឹងត្រង់
+# 🏥 WISN Tools Project
+
+### ប្រព័ន្ធកម្រងសំណួរ និងវិភាគបន្ទុកការងារ WISN - មន្ទីរពេទ្យបង្អែក ហ៊ុន សែន ស្ទឹងត្រង់
 ### *Workload Indicators of Staffing Need (WISN) Assessment Platform - RH Stung Trang*
 
 > **វេទិកាស្ទង់មតិ និងគណនាបន្ទុកការងារបុគ្គលិកសុខាភិបាល តាមវិធីសាស្ត្រ WISN របស់អង្គការសុខភាពពិភពលោក (WHO) សហការរវាង វិទ្យាស្ថានជាតិសុខភាពសាធារណៈ (NIPH) និង មន្ទីរពេទ្យបង្អែក ហ៊ុន សែន ស្ទឹងត្រង់ ខេត្តកំពង់ចាម**
@@ -15,7 +17,7 @@ save on the device first and upload when there is internet.
 - Setup (once): [`docs/SETUP_GOOGLE_SHEETS.md`](docs/SETUP_GOOGLE_SHEETS.md), then put the web app URL in `src/config.ts`.
 - Local testing without Google: `npm run mock` and `npm run test:api`.
 - Offline survey as one HTML file (no internet; publish to the Sheet later):
-  `npm run build:offline` → `offline/WISN-Survey-Offline.html`, see [`docs/OFFLINE_SURVEY.md`](docs/OFFLINE_SURVEY.md).
+  `npm run build:offline` → `offline/WISN-Tools-Project-Offline.html`, see [`docs/OFFLINE_SURVEY.md`](docs/OFFLINE_SURVEY.md).
 
 ---
 

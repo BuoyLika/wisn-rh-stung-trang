@@ -68,7 +68,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-bold text-slate-900 text-base sm:text-lg tracking-tight">
-                  {language === 'km' ? 'ប្រព័ន្ធកម្រងសំណួរស្រាវជ្រាវ' : 'Research Questionnaire'}
+                  WISN Tools Project
                 </span>
                 <span className="px-2 py-0.5 text-[10px] font-semibold bg-teal-100 text-teal-800 rounded-full uppercase tracking-wider">
                   v1.0 Pro
@@ -81,7 +81,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* Navigation Tabs */}
-          <nav className="hidden md:flex items-center space-x-1 bg-slate-100/80 p-1 rounded-xl">
+          <nav className="hidden xl:flex items-center space-x-1 bg-slate-100/80 p-1 rounded-xl">
             {navItems.map((item) => {
               const active = currentView === item.id;
               return (
@@ -176,13 +176,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="flex items-center space-x-1.5 px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg bg-teal-600 hover:bg-teal-700 text-white transition shadow-sm shadow-teal-600/20 active:scale-95"
             >
               <Download className="w-4 h-4" />
-              <span className="hidden sm:inline">{t.exportBtn}</span>
+              <span className="hidden 2xl:inline">{t.exportBtn}</span>
             </button>
           </div>
         </div>
 
         {/* Mobile Navigation Bar */}
-        <div className="md:hidden flex items-center justify-around py-2 border-t border-slate-100 overflow-x-auto">
+        <div className="xl:hidden flex items-center justify-around py-2 border-t border-slate-100 overflow-x-auto">
           {navItems.map((item) => {
             const active = currentView === item.id;
             return (

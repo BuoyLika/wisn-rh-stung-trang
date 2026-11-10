@@ -1,6 +1,6 @@
 # Offline survey (one HTML file)
 
-`offline/WISN-Survey-Offline.html` is the whole survey in one file. Copy it to
+`offline/WISN-Tools-Project-Offline.html` is the whole survey in one file. Copy it to
 any Windows PC and double-click it: it opens in the browser and works with no
 internet and no server.
 
@@ -8,7 +8,7 @@ Use **Chrome or Edge** (they can also save every answer into a folder).
 
 ## On the PC
 
-1. Double-click `WISN-Survey-Offline.html`.
+1. Double-click `WISN-Tools-Project-Offline.html`.
 2. Type your name and interviewer code (e.g. `K001`), then **Start**.
 3. Click **Choose folder** in the bar and pick a folder, e.g. `Documents\WISN answers`.
    Every answer is then also saved there as its own `.json` file, plus
@@ -43,5 +43,5 @@ again to update the Sheet.
 ## Build the file (developers)
 
 ```bash
-npm run build:offline     # writes offline/WISN-Survey-Offline.html
+npm run build:offline     # writes offline/WISN-Tools-Project-Offline.html
 ```

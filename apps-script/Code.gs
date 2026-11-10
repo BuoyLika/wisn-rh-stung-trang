@@ -42,7 +42,7 @@ var CONFIG_COLS = ['key', 'updatedAt', 'updatedBy'];
 // ---------------------------------------------------------------- web app
 
 function doGet() {
-  return out_({ ok: true, result: { app: 'wisn-survey', version: APP_VERSION } });
+  return out_({ ok: true, result: { app: 'wisn-tools-project', version: APP_VERSION } });
 }
 
 function doPost(e) {

@@ -350,7 +350,7 @@ export const App: React.FC = () => {
       <footer className="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <div>
-            <span className="font-bold text-slate-700">Research Questionnaire Platform</span> — Scientific Survey Engine
+            <span className="font-bold text-slate-700">WISN Tools Project</span> — WHO WISN workload &amp; staffing survey
           </div>
           <div>
             Built with React, TypeScript & Tailwind CSS | Open Source Academic Software
