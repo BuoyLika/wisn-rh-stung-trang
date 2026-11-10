@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "mock": "node tools/mock-gas/server.mjs",
     "test:api": "node tools/mock-gas/test-api.mjs",
-    "build:offline": "tsc && node tools/build-offline.mjs"
+    "build:offline": "tsc && node tools/build-offline.mjs",
+    "test:backup": "node tools/mock-gas/test-backup.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",

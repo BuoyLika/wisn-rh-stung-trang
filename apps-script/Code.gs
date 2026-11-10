@@ -8,6 +8,13 @@
  *   Users       accounts (passwords stored as salted hashes)
  *   Sessions    login tokens
  *   Config      shared survey form + HO2 indicators
+ *   GitHub backup  copies of answers waiting to be sent to the private GitHub repo
+ *
+ * GitHub backup (optional): every saved, edited or deleted answer is also
+ * committed as a JSON file to a PRIVATE GitHub repo. Turn it on by adding the
+ * script properties GITHUB_TOKEN and GITHUB_REPO (docs/GITHUB_BACKUP.md).
+ * Saving to the Sheet never waits on GitHub: copies wait in the
+ * "GitHub backup" tab until GitHub accepts them.
  *
  * The page talks to it with POST {action, token, ...}. Every action except
  * "login" needs a valid token, and the role checks happen here, not in the page.
@@ -27,7 +34,8 @@ var SH = {
   users: 'Users',
   sessions: 'Sessions',
   config: 'Config',
-  table: 'Answers table'
+  table: 'Answers table',
+  backup: 'GitHub backup'
 };
 
 var RESP_COLS = ['id', 'submittedAt', 'interviewerId', 'staffCode', 'staffName', 'staffPhone',
@@ -38,6 +46,9 @@ var USER_COLS = ['id', 'username', 'name', 'role', 'interviewerCode', 'phone', '
   'active', 'createdAt', 'salt', 'hash'];
 var SESSION_COLS = ['token', 'userId', 'createdAt', 'expiresAt'];
 var CONFIG_COLS = ['key', 'updatedAt', 'updatedBy'];
+var BACKUP_COLS = ['jobId', 'queuedAt', 'op', 'path', 'message', 'tries', 'lastError'];
+var BACKUP_NOW = 5;         // copies sent to GitHub during a save; the timer sends the rest
+var BACKUP_PER_RUN = 60;    // copies sent per timer run
 
 // ---------------------------------------------------------------- web app
 
@@ -55,7 +66,9 @@ function doPost(e) {
   try {
     var fn = Object.prototype.hasOwnProperty.call(ACTIONS, req.action) ? ACTIONS[req.action] : null;
     if (!fn) throw err_('Unknown action', 'bad_request');
-    return out_({ ok: true, result: fn(req) });
+    var result = fn(req);
+    if (BACKUP_ACTIONS[req.action]) sendBackupsSafe_(BACKUP_NOW);
+    return out_({ ok: true, result: result });
   } catch (err) {
     return out_({ ok: false, error: err.message || String(err), code: err.code || 'error' });
   }
@@ -155,6 +168,7 @@ var ACTIONS = {
       var dupT = null;
       var now = iso_(Date.now());
       var results = [];
+      var backups = [];
 
       list.forEach(function (raw) {
         var r = cleanResponse_(raw);
@@ -178,6 +192,7 @@ var ACTIONS = {
             results.push({ id: r.id, status: 'duplicate', existingId: other.o.id }); return;
           }
           writeResponse_(t, ex.row, r);
+          backups.push(backupPut_('responses', r, 'Update', user));
           results.push({ id: r.id, status: 'updated' });
           return;
         }
@@ -189,6 +204,7 @@ var ACTIONS = {
             var held = respRow_(r);
             held.heldAt = now; held.heldBy = user.username; held.existingId = dup.o.id;
             append_(dupT, held, JSON.stringify(r));
+            backups.push(backupPut_('duplicates', r, 'Hold duplicate', user));
           }
           results.push({ id: r.id, status: 'duplicate', existingId: dup.o.id });
           return;
@@ -198,8 +214,10 @@ var ACTIONS = {
         var item = { row: row, o: respRow_(r), json: JSON.stringify(r) };
         byId[r.id] = item;
         if (r.staffCode) byCode[codeKey_(r.staffCode)] = item;
+        backups.push(backupPut_('responses', r, 'Add', user));
         results.push({ id: r.id, status: 'added' });
       });
+      queueBackups_(backups);
       return { results: results };
     });
   },
@@ -231,6 +249,7 @@ var ACTIONS = {
       r.updatedAt = iso_(Date.now());
       r.updatedBy = user.username;
       writeResponse_(t, ex.row, r);
+      queueBackups_([backupPut_('responses', r, 'Edit', user)]);
       return { response: r };
     });
   },
@@ -378,6 +397,10 @@ function onOpen() {
     .addItem('1. Set up (tabs + first admin)', 'setup')
     .addItem('Reset a user password', 'menuResetPassword')
     .addItem('Build "Answers table" tab', 'buildAnswersTable')
+    .addSeparator()
+    .addItem('GitHub backup: check settings', 'menuCheckBackup')
+    .addItem('GitHub backup: turn on timer (every 10 min)', 'menuBackupTimer')
+    .addItem('GitHub backup: copy ALL answers now', 'menuBackupAll')
     .addToUi();
 }
 
@@ -446,6 +469,227 @@ function buildAnswersTable() {
   sh.getRange(1, 1, values.length, header.length).setNumberFormat('@').setValues(values);
   sh.setFrozenRows(1);
   notify_('Answers table: ' + rows.length + ' answers, ' + keys.length + ' questions.');
+}
+
+// ---------------------------------------------------------------- GitHub backup
+//
+// Script properties (Apps Script > Project Settings > Script properties):
+//   GITHUB_TOKEN   fine-grained token for the backup repo only, "Contents: Read and write"
+//   GITHUB_REPO    owner/name of a PRIVATE repo, e.g. buoylika/wisn-survey-data
+//   GITHUB_BRANCH  optional, default "main"
+// Files in the repo: responses/<id>.json, duplicates/<id>.json, deleted/<id>.json.
+// Each change is one commit, so the repo history keeps every earlier version.
+
+var BACKUP_ACTIONS = { submit: true, update: true, remove: true, clearAll: true };
+
+function backupConfig_() {
+  var p = PropertiesService.getScriptProperties();
+  var token = p.getProperty('GITHUB_TOKEN');
+  var repo = p.getProperty('GITHUB_REPO');
+  if (!token || !repo) return null;
+  return { token: token, repo: repo.trim(), branch: (p.getProperty('GITHUB_BRANCH') || 'main').trim() };
+}
+
+function backupPath_(folder, id) {
+  return folder + '/' + String(id).replace(/[^A-Za-z0-9._-]/g, '_') + '.json';
+}
+
+function backupLabel_(r) {
+  return 'interview ' + (r.staffCode ? r.staffCode + ' ' : '') + '(' + r.id + ')';
+}
+
+function backupPut_(folder, r, verb, user) {
+  return {
+    op: 'put',
+    path: backupPath_(folder, r.id),
+    message: verb + ' ' + backupLabel_(r) + ' by ' + user.username,
+    json: JSON.stringify(r, null, 2)
+  };
+}
+
+/** Adds copies to the "GitHub backup" tab. Call inside withLock_. Does nothing until backup is set up. */
+function queueBackups_(jobs) {
+  if (!jobs.length || !backupConfig_()) return;
+  var t = table_(SH.backup, BACKUP_COLS);
+  var now = iso_(Date.now());
+  jobs.forEach(function (j) {
+    append_(t, {
+      jobId: Utilities.getUuid(), queuedAt: now, op: j.op, path: j.path,
+      message: j.message, tries: '0', lastError: ''
+    }, j.op === 'put' ? j.json : null);
+  });
+}
+
+/** Sends waiting copies; never throws, so a GitHub problem never breaks a save. */
+function sendBackupsSafe_(max) {
+  try { return sendBackups_(max); } catch (e) { log_('GitHub backup: ' + (e.message || e)); return null; }
+}
+
+/** Sends up to `max` waiting copies, oldest first. Returns {sent, failed, waiting}. */
+function sendBackups_(max) {
+  var cfg = backupConfig_();
+  if (!cfg) return { sent: 0, failed: 0, waiting: 0, off: true };
+  var jobs = withLock_(function () {
+    return table_(SH.backup, BACKUP_COLS).items.slice(0, max).map(function (it) {
+      return { jobId: it.o.jobId, op: it.o.op, path: it.o.path, message: it.o.message, json: it.json };
+    });
+  });
+  if (!jobs.length) return { sent: 0, failed: 0, waiting: 0 };
+  checkBackupRepo_(cfg);
+
+  var done = {}, failed = {}, blocked = {};
+  jobs.forEach(function (j) {
+    // keep the order of changes to one file: after a failure, later changes to it wait too
+    if (blocked[j.path]) return;
+    try {
+      githubWrite_(cfg, j);
+      done[j.jobId] = true;
+    } catch (e) {
+      failed[j.jobId] = String(e.message || e).slice(0, 300);
+      blocked[j.path] = true;
+    }
+  });
+
+  return withLock_(function () {
+    var t = table_(SH.backup, BACKUP_COLS);
+    ensureRows_(t.sh, t.next + 1); // Sheets refuses to delete every non-frozen row
+    var nSent = 0, nFailed = 0;
+    for (var i = t.items.length - 1; i >= 0; i--) {
+      var it = t.items[i];
+      if (done[it.o.jobId]) {
+        t.sh.deleteRow(it.row);
+        nSent++;
+      } else if (failed[it.o.jobId] !== undefined) {
+        it.o.tries = String(Number(it.o.tries || 0) + 1);
+        it.o.lastError = failed[it.o.jobId];
+        writeRow_(t, it.row, it.o, it.json || null);
+        nFailed++;
+      }
+    }
+    return { sent: nSent, failed: nFailed, waiting: t.items.length - nSent };
+  });
+}
+
+function githubRequest_(cfg, method, url, body) {
+  var opts = {
+    method: method,
+    muteHttpExceptions: true,
+    headers: {
+      Authorization: 'Bearer ' + cfg.token,
+      Accept: 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28'
+    }
+  };
+  if (body) {
+    opts.contentType = 'application/json';
+    opts.payload = JSON.stringify(body);
+  }
+  var res = UrlFetchApp.fetch(url, opts);
+  var text = res.getContentText();
+  return { code: res.getResponseCode(), data: parse_(text), text: text };
+}
+
+function githubError_(what, res) {
+  var msg = (res.data && res.data.message) || String(res.text || '').slice(0, 200);
+  return err_('GitHub ' + what + ' failed (' + res.code + '): ' + msg, 'backup');
+}
+
+/** Refuses to back up into a public repo: the answers hold names and phone numbers. */
+function checkBackupRepo_(cfg) {
+  var cache = CacheService.getScriptCache();
+  var key = 'gh_private_' + cfg.repo;
+  if (cache.get(key) === 'yes') return;
+  var res = githubRequest_(cfg, 'get', 'https://api.github.com/repos/' + cfg.repo);
+  if (res.code !== 200) throw githubError_('repo check for ' + cfg.repo, res);
+  if (res.data.private !== true) {
+    throw err_('GitHub repo ' + cfg.repo + ' is PUBLIC. Backup stopped: make it private first.', 'backup');
+  }
+  cache.put(key, 'yes', 3600);
+}
+
+function githubWrite_(cfg, job) {
+  var url = 'https://api.github.com/repos/' + cfg.repo + '/contents/' +
+    job.path.split('/').map(encodeURIComponent).join('/');
+  var cur = githubRequest_(cfg, 'get', url + '?ref=' + encodeURIComponent(cfg.branch));
+  if (cur.code !== 200 && cur.code !== 404) throw githubError_('read of ' + job.path, cur);
+  var sha = cur.code === 200 ? cur.data.sha : null;
+
+  if (job.op === 'delete') {
+    if (!sha) return; // already gone
+    var del = githubRequest_(cfg, 'delete', url, { message: job.message, sha: sha, branch: cfg.branch });
+    if (del.code !== 200) throw githubError_('delete of ' + job.path, del);
+    return;
+  }
+
+  var content = Utilities.base64Encode(job.json, Utilities.Charset.UTF_8);
+  if (sha && String(cur.data.content || '').replace(/\s/g, '') === content) return; // no change
+  var body = { message: job.message, content: content, branch: cfg.branch };
+  if (sha) body.sha = sha;
+  var put = githubRequest_(cfg, 'put', url, body);
+  if (put.code !== 200 && put.code !== 201) throw githubError_('save of ' + job.path, put);
+}
+
+/** Timer job (made by the menu): sends what is still waiting. */
+function backupTimer() {
+  sendBackupsSafe_(BACKUP_PER_RUN);
+}
+
+function menuCheckBackup() {
+  var cfg = backupConfig_();
+  if (!cfg) {
+    notify_('GitHub backup is OFF.\n\nAdd the script properties GITHUB_TOKEN and GITHUB_REPO ' +
+      '(Project Settings > Script properties). Steps: docs/GITHUB_BACKUP.md');
+    return;
+  }
+  try {
+    CacheService.getScriptCache().remove('gh_private_' + cfg.repo);
+    checkBackupRepo_(cfg);
+    var waiting = table_(SH.backup, BACKUP_COLS).items.length;
+    var timer = ScriptApp.getProjectTriggers().some(function (tr) { return tr.getHandlerFunction() === 'backupTimer'; });
+    notify_('GitHub backup is ON.\n\nRepo: ' + cfg.repo + ' (private)\nBranch: ' + cfg.branch +
+      '\nCopies waiting: ' + waiting + '\nTimer: ' + (timer ? 'on' : 'OFF - use "turn on timer"'));
+  } catch (e) {
+    notify_('GitHub backup has a problem:\n\n' + (e.message || e));
+  }
+}
+
+function menuBackupTimer() {
+  var has = ScriptApp.getProjectTriggers().some(function (tr) { return tr.getHandlerFunction() === 'backupTimer'; });
+  if (!has) ScriptApp.newTrigger('backupTimer').timeBased().everyMinutes(10).create();
+  notify_('GitHub backup timer is on: every 10 minutes it sends any copies still waiting.');
+}
+
+/** Queues a copy of every answer (Responses, Duplicates, Deleted) and starts sending. */
+function backupAll() {
+  if (!backupConfig_()) throw err_('GitHub backup is not set up', 'backup');
+  var who = { username: 'backup-all' };
+  var n = withLock_(function () {
+    var jobs = [];
+    [[SH.responses, RESP_COLS, 'responses'], [SH.duplicates, DUP_COLS, 'duplicates'], [SH.deleted, DEL_COLS, 'deleted']]
+      .forEach(function (p) {
+        table_(p[0], p[1]).items.forEach(function (it) {
+          var r = parse_(it.json);
+          if (!r || !r.id) return;
+          if (p[2] === 'deleted') { r.deletedAt = it.o.deletedAt; r.deletedBy = it.o.deletedBy; }
+          jobs.push(backupPut_(p[2], r, 'Back up', who));
+        });
+      });
+    queueBackups_(jobs);
+    return jobs.length;
+  });
+  var res = sendBackups_(BACKUP_PER_RUN);
+  return { queued: n, sent: res.sent, failed: res.failed, waiting: res.waiting };
+}
+
+function menuBackupAll() {
+  try {
+    var r = backupAll();
+    notify_('Queued ' + r.queued + ' answers.\nSent now: ' + r.sent + '\nStill waiting: ' + r.waiting +
+      (r.failed ? '\nFailed (will retry): ' + r.failed : '') +
+      (r.waiting ? '\n\nThe timer sends the rest (turn it on in this menu).' : ''));
+  } catch (e) {
+    notify_('GitHub backup: ' + (e.message || e));
+  }
 }
 
 // ---------------------------------------------------------------- helpers
@@ -557,13 +801,23 @@ function writeResponse_(t, row, r) { writeRow_(t, row, respRow_(r), JSON.stringi
 function moveToDeleted_(items, user) {
   var dt = table_(SH.deleted, DEL_COLS);
   var now = iso_(Date.now());
+  var backups = [];
   items.forEach(function (it) {
     var o = {};
     Object.keys(it.o).forEach(function (k) { o[k] = it.o[k]; });
     o.deletedAt = now;
     o.deletedBy = user.username;
     append_(dt, o, it.json);
+
+    var r = parse_(it.json) || {};
+    r.id = r.id || o.id;
+    r.deletedAt = now;
+    r.deletedBy = user.username;
+    backups.push(backupPut_('deleted', r, 'Delete', user));
+    backups.push({ op: 'delete', path: backupPath_('responses', r.id),
+      message: 'Delete ' + backupLabel_(r) + ' by ' + user.username + ' (copy kept in deleted/)' });
   });
+  queueBackups_(backups);
 }
 
 // ---- generic tab access. All cells are plain text ('@'), so values that start

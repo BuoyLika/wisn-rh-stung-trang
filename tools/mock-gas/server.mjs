@@ -98,6 +98,44 @@ const spreadsheet = {
   insertSheet: (n) => { const s = new FakeSheet(n); book.sheets.set(n, s); save(); return s; },
 };
 
+// ---------------- fake GitHub (for the backup). On when MOCK_GITHUB_REPO is set.
+// GET /__github shows the fake repo; GET /__github/fail?n=3 makes the next 3 GitHub calls fail;
+// GET /__github/public?on=1 makes the repo public; GET /__run/<fn> runs a Code.gs function.
+const ghRepo = process.env.MOCK_GITHUB_REPO || '';
+const props = ghRepo ? { GITHUB_TOKEN: 'mock-token', GITHUB_REPO: ghRepo } : {};
+const github = { files: new Map(), commits: [], failNext: 0, isPublic: false };
+function fakeGithub(url, opts = {}) {
+  const method = String(opts.method || 'get').toUpperCase();
+  const reply = (code, obj) => ({ getResponseCode: () => code, getContentText: () => JSON.stringify(obj) });
+  if (github.failNext > 0) { github.failNext--; return reply(503, { message: 'mock outage' }); }
+  if ((opts.headers || {}).Authorization !== 'Bearer mock-token') return reply(401, { message: 'Bad credentials' });
+  const u = new URL(url);
+  const base = `/repos/${ghRepo}`;
+  if (u.pathname === base && method === 'GET') return reply(200, { full_name: ghRepo, private: !github.isPublic });
+  if (!u.pathname.startsWith(base + '/contents/')) return reply(404, { message: 'Not Found' });
+  const p = decodeURIComponent(u.pathname.slice((base + '/contents/').length));
+  const cur = github.files.get(p);
+  const body = opts.payload ? JSON.parse(opts.payload) : {};
+  if (method === 'GET') return cur ? reply(200, { sha: cur.sha, content: cur.content }) : reply(404, { message: 'Not Found' });
+  if (method === 'PUT') {
+    if (cur && body.sha !== cur.sha) return reply(409, { message: 'sha mismatch' });
+    if (!cur && body.sha) return reply(422, { message: 'sha given for a new file' });
+    const sha = crypto.createHash('sha1').update(body.content + Date.now() + Math.random()).digest('hex');
+    github.files.set(p, { sha, content: body.content });
+    github.commits.push({ message: body.message, path: p, op: cur ? 'update' : 'create' });
+    return reply(cur ? 200 : 201, { content: { sha } });
+  }
+  if (method === 'DELETE') {
+    if (!cur) return reply(404, { message: 'Not Found' });
+    if (body.sha !== cur.sha) return reply(409, { message: 'sha mismatch' });
+    github.files.delete(p);
+    github.commits.push({ message: body.message, path: p, op: 'delete' });
+    return reply(200, {});
+  }
+  return reply(405, { message: 'method' });
+}
+const triggers = [];
+
 const cache = new Map();
 const sandbox = {
   SpreadsheetApp: {
@@ -109,7 +147,21 @@ const sandbox = {
     DigestAlgorithm: { SHA_256: 'sha256' },
     Charset: { UTF_8: 'utf8' },
     computeDigest: (alg, s) => [...crypto.createHash(alg).update(String(s), 'utf8').digest()].map((b) => (b > 127 ? b - 256 : b)),
-    base64Encode: (bytes) => Buffer.from(bytes.map((b) => (b + 256) % 256)).toString('base64'),
+    base64Encode: (data) =>
+      typeof data === 'string'
+        ? Buffer.from(data, 'utf8').toString('base64')
+        : Buffer.from(data.map((b) => (b + 256) % 256)).toString('base64'),
+  },
+  PropertiesService: {
+    getScriptProperties: () => ({ getProperty: (k) => (k in props ? props[k] : null) }),
+  },
+  UrlFetchApp: { fetch: fakeGithub },
+  ScriptApp: {
+    getProjectTriggers: () => triggers,
+    newTrigger: (fn) => {
+      const b = { timeBased: () => b, everyMinutes: () => b, create: () => triggers.push({ getHandlerFunction: () => fn }) };
+      return b;
+    },
   },
   CacheService: {
     getScriptCache: () => ({
@@ -135,6 +187,27 @@ else console.log('Loaded saved data from', saveFile);
 http.createServer((req, res) => {
   const headers = { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' };
   if (req.method === 'OPTIONS') { res.writeHead(204, headers); res.end(); return; }
+  if (req.method === 'GET' && req.url.startsWith('/__')) {
+    const u = new URL(req.url, 'http://x');
+    let out;
+    if (u.pathname === '/__github') {
+      out = {
+        files: Object.fromEntries([...github.files].map(([p, f]) => [p, JSON.parse(Buffer.from(f.content, 'base64').toString('utf8'))])),
+        commits: github.commits,
+      };
+    } else if (u.pathname === '/__github/fail') {
+      github.failNext = Number(u.searchParams.get('n') || 1); out = { failNext: github.failNext };
+    } else if (u.pathname === '/__github/public') {
+      github.isPublic = u.searchParams.get('on') === '1'; cache.clear(); out = { isPublic: github.isPublic };
+    } else if (u.pathname.startsWith('/__run/')) {
+      const fn = u.pathname.slice('/__run/'.length);
+      out = /^[A-Za-z]\w*$/.test(fn) ? { result: vm.runInContext(`${fn}()`, sandbox) ?? null } : { error: 'bad name' };
+    } else if (u.pathname === '/__sheet') {
+      const sh = book.sheets.get(u.searchParams.get('name'));
+      out = { rows: sh ? sh.data : null };
+    }
+    res.writeHead(out ? 200 : 404, headers); res.end(JSON.stringify(out || { error: 'not found' })); return;
+  }
   // Like Apps Script: a JSON body with a non-simple content type would need a preflight
   // that Google does not answer, so the app must send text/plain.
   if (req.method === 'POST' && !/^text\/plain/.test(req.headers['content-type'] || '')) {

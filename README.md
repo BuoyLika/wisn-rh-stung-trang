@@ -15,7 +15,8 @@ Logins and admin/interviewer rights are checked there, not in the page. Answers
 save on the device first and upload when there is internet.
 
 - Setup (once): [`docs/SETUP_GOOGLE_SHEETS.md`](docs/SETUP_GOOGLE_SHEETS.md), then put the web app URL in `src/config.ts`.
-- Local testing without Google: `npm run mock` and `npm run test:api`.
+- Backup of every interview to a private GitHub repo: [`docs/GITHUB_BACKUP.md`](docs/GITHUB_BACKUP.md).
+- Local testing without Google: `npm run mock`, `npm run test:api`, `npm run test:backup`.
 - Offline survey as one HTML file (no internet; publish to the Sheet later):
   `npm run build:offline` → `offline/WISN-Tools-Project-Offline.html`, see [`docs/OFFLINE_SURVEY.md`](docs/OFFLINE_SURVEY.md).
 

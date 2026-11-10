@@ -56,6 +56,11 @@ Until the URL is set, the site only shows "Not connected to the Google Sheet".
 3. **Users** tab → add one account per interviewer (username, code like `K001`,
    password). Give each interviewer their username and password.
 
+## 7. Back up to GitHub (recommended)
+
+Copy every interview to a private GitHub repo as well, in case the Sheet is
+lost: [`GITHUB_BACKUP.md`](GITHUB_BACKUP.md).
+
 ## Daily use
 
 - Interviewers log in on their phone/tablet and fill the survey. Answers save on
@@ -88,6 +93,7 @@ Version: New version → Deploy**. The URL stays the same.
 
 ```bash
 npm run mock        # local stand-in on http://localhost:8787, prints an admin password
-npm run test:api    # 43 checks of the backend rules
+npm run test:api    # checks of the backend rules
+npm run test:backup # checks of the GitHub backup (fake GitHub)
 VITE_SHEETS_API_URL=http://localhost:8787 npm run dev
 ```
