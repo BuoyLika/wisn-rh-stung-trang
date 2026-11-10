@@ -1,18 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { AppView, Language, ResearchSurvey, SurveyResponse, UserAccount } from './types';
-import { 
-  getSavedSurvey, 
-  saveSurvey, 
-  resetSurveyToDefault, 
-  getSavedResponses, 
-  saveResponse, 
+import {
+  getSavedSurvey,
+  saveSurvey,
+  resetSurveyToDefault,
+  getSavedResponses,
+  queueResponse,
   updateResponse,
   deleteResponse,
-  clearAllResponses, 
-  seedMockResponses,
+  clearAllResponses,
   getCurrentUser,
-  logoutUser
+  logoutUser,
+  syncNow,
+  SyncResult,
+  loadConfig,
+  saveSurveyRemote,
+  getPendingCount,
+  getUploadProblems,
+  clearUploadProblems,
+  getOldLocalResponses,
+  queueOldLocalResponses,
 } from './utils/storage';
+import { isApiConfigured, errorText, ApiError } from './utils/api';
 import { Navbar } from './components/Navbar';
 import { RespondentView } from './components/RespondentView';
 import { FormBuilder } from './components/FormBuilder';
@@ -22,6 +31,9 @@ import { ExportModal } from './components/ExportModal';
 import { WisnCalculator } from './components/WisnCalculator';
 import { AuthModal } from './components/AuthModal';
 import { DataSyncModal } from './components/DataSyncModal';
+import { SyncBar } from './components/SyncBar';
+
+const SYNC_EVERY_MS = 60_000;
 
 export const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<AppView>('survey');
@@ -29,68 +41,199 @@ export const App: React.FC = () => {
   const [survey, setSurvey] = useState<ResearchSurvey>(getSavedSurvey);
   const [responses, setResponses] = useState<SurveyResponse[]>(getSavedResponses);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  // bumps when the shared settings arrive, so the calculator reloads them
+  const [configVersion, setConfigVersion] = useState(0);
 
-  // Authentication & Multi-Device Sync state
   const [currentUser, setCurrentUser] = useState<UserAccount | null>(getCurrentUser);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(() => !getCurrentUser());
   const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
 
-  const handleLogout = () => {
-    logoutUser();
-    setCurrentUser(null);
-    setIsAuthModalOpen(true);
-  };
+  // upload state shown in the bar under the menu
+  const [pending, setPending] = useState(getPendingCount);
+  const [syncing, setSyncing] = useState(false);
+  const [syncError, setSyncError] = useState<ApiError | null>(null);
+  const [lastSync, setLastSync] = useState<Date | null>(null);
+  const [problemCount, setProblemCount] = useState(() => getUploadProblems().length);
+  const [duplicatesHeld, setDuplicatesHeld] = useState(0);
+  const [oldLocalCount, setOldLocalCount] = useState(() => getOldLocalResponses().length);
 
-  // Force upgrade if browser has outdated survey schema cached
-  useEffect(() => {
-    const hasOpdObGyn = survey.sections?.some((s) => s.id === 'sec-g-opd-obgyn');
-    const hasEye = survey.sections?.some((s) => s.id === 'sec-g-eye');
-    if (!hasOpdObGyn || !hasEye || (survey.questions?.length || 0) < 210) {
-      console.log('Force-refreshing survey to latest WISN version with OPD OB/GYN & Eye Clinic...');
-      const fresh = resetSurveyToDefault();
-      setSurvey(fresh);
+  const isAdmin = currentUser?.role === 'admin';
+
+  const applySync = useCallback((r: SyncResult) => {
+    setResponses(r.responses);
+    setPending(r.pending);
+    setProblemCount(getUploadProblems().length);
+    if (r.duplicatesHeld !== undefined) setDuplicatesHeld(r.duplicatesHeld);
+    setSyncError(r.error || null);
+    if (!r.error) setLastSync(new Date());
+    if (r.error?.code === 'auth') {
+      setCurrentUser(null);
+      setIsAuthModalOpen(true);
     }
   }, []);
 
-  // Sync state with storage
+  const runSync = useCallback(async () => {
+    if (!getCurrentUser()) return;
+    setSyncing(true);
+    try {
+      applySync(await syncNow());
+    } finally {
+      setSyncing(false);
+    }
+  }, [applySync]);
+
+  // After login (and on every start): get the shared form + HO2 numbers, then sync answers.
+  useEffect(() => {
+    if (!currentUser || !isApiConfigured()) return;
+    setResponses(getSavedResponses());
+    setPending(getPendingCount());
+    setProblemCount(getUploadProblems().length);
+    let stop = false;
+    loadConfig()
+      .then((cfg) => {
+        if (stop) return;
+        if (cfg.survey) setSurvey(cfg.survey);
+        setConfigVersion((v) => v + 1);
+      })
+      .catch((err) => console.warn('Shared settings not loaded (using this device copy):', err));
+    runSync();
+    const timer = setInterval(runSync, SYNC_EVERY_MS);
+    window.addEventListener('online', runSync);
+    return () => {
+      stop = true;
+      clearInterval(timer);
+      window.removeEventListener('online', runSync);
+    };
+  }, [currentUser?.id, runSync]);
+
+  // keep the device copy of the form up to date
   useEffect(() => {
     saveSurvey(survey);
   }, [survey]);
 
-  const handleSubmitResponse = (newResponse: SurveyResponse) => {
-    const updated = saveResponse(newResponse);
-    setResponses(updated);
-  };
-
-  const handleUpdateResponse = (responseId: string, updatedData: Partial<SurveyResponse>) => {
-    const updated = updateResponse(responseId, updatedData);
-    setResponses(updated);
-  };
-
-  const handleDeleteResponse = (responseId: string) => {
-    const updated = deleteResponse(responseId);
-    setResponses(updated);
-  };
-
-  const handleSaveSurvey = (updatedSurvey: ResearchSurvey) => {
-    setSurvey(updatedSurvey);
-    saveSurvey(updatedSurvey);
-  };
-
-  const handleResetSurvey = () => {
-    const defaultSurvey = resetSurveyToDefault();
-    setSurvey(defaultSurvey);
-  };
-
-  const handleLoadMockData = () => {
-    const seeded = seedMockResponses();
-    setResponses(seeded);
-  };
-
-  const handleClearResponses = () => {
-    clearAllResponses();
+  const handleLogout = async () => {
+    if (getPendingCount() > 0) {
+      const ok = confirm(
+        language === 'km'
+          ? `មានចម្លើយ ${getPendingCount()} មិនទាន់បានបញ្ជូន។ វានឹងនៅលើឧបករណ៍នេះ ហើយបញ្ជូននៅពេលអ្នកចូលម្តងទៀត។ ចាកចេញ?`
+          : `${getPendingCount()} answers are not uploaded yet. They stay on this device and upload when you log in again. Log out?`
+      );
+      if (!ok) return;
+    }
+    await logoutUser();
+    setCurrentUser(null);
     setResponses([]);
+    setPending(0);
+    setSyncError(null);
+    setLastSync(null);
+    setIsAuthModalOpen(true);
   };
+
+  const handleSubmitResponse = (newResponse: SurveyResponse) => {
+    setResponses(queueResponse(newResponse));
+    setPending(getPendingCount());
+    runSync();
+  };
+
+  const showError = (err: unknown) => alert(errorText(err));
+
+  const handleUpdateResponse = async (responseId: string, updatedData: Partial<SurveyResponse>) => {
+    try {
+      setResponses(await updateResponse(responseId, updatedData));
+    } catch (err) {
+      showError(err);
+    }
+  };
+
+  const handleDeleteResponse = async (responseId: string) => {
+    try {
+      setResponses(await deleteResponse(responseId));
+      setPending(getPendingCount());
+    } catch (err) {
+      showError(err);
+    }
+  };
+
+  const handleSaveSurvey = async (updatedSurvey: ResearchSurvey) => {
+    setSurvey(updatedSurvey);
+    if (!isAdmin) return;
+    try {
+      await saveSurveyRemote(updatedSurvey);
+    } catch (err) {
+      showError(err);
+    }
+  };
+
+  /** Admin (Form Builder): back to the built-in form, for every device. */
+  const handleResetSurveyForAll = async () => {
+    const fresh = resetSurveyToDefault();
+    setSurvey(fresh);
+    if (!isAdmin) return;
+    try {
+      await saveSurveyRemote(fresh);
+    } catch (err) {
+      showError(err);
+    }
+  };
+
+  /** Anyone (survey page): reload the latest form, from the Sheet if online. */
+  const handleRefreshSurvey = async () => {
+    setSurvey(resetSurveyToDefault());
+    try {
+      const cfg = await loadConfig();
+      if (cfg.survey) setSurvey(cfg.survey);
+    } catch {
+      /* offline: built-in form */
+    }
+  };
+
+  const handleClearResponses = async () => {
+    try {
+      setResponses(await clearAllResponses());
+    } catch (err) {
+      showError(err);
+    }
+  };
+
+  const handleUploadOld = () => {
+    const n = queueOldLocalResponses();
+    setOldLocalCount(0);
+    setResponses(getSavedResponses());
+    setPending(getPendingCount());
+    if (n) runSync();
+  };
+
+  const handleDownloadProblems = () => {
+    const problems = getUploadProblems();
+    const blob = new Blob([JSON.stringify({ problems }, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `WISN_upload_problems_${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleClearProblems = () => {
+    clearUploadProblems();
+    setProblemCount(0);
+  };
+
+  if (!isApiConfigured()) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-6">
+        <div className="max-w-md bg-white rounded-2xl border border-amber-300 p-6 text-sm text-slate-700 space-y-2">
+          <h1 className="font-black text-lg text-slate-900">Not connected to the Google Sheet</h1>
+          <p>
+            Paste the Apps Script web app address into <code>src/config.ts</code> and build again.
+            Steps: <code>docs/SETUP_GOOGLE_SHEETS.md</code>.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800">
@@ -108,6 +251,23 @@ export const App: React.FC = () => {
         onLogout={handleLogout}
       />
 
+      {currentUser && (
+        <SyncBar
+          language={language}
+          pending={pending}
+          syncing={syncing}
+          error={syncError}
+          lastSync={lastSync}
+          problemCount={problemCount}
+          duplicatesHeld={isAdmin ? duplicatesHeld : 0}
+          oldLocalCount={oldLocalCount}
+          onSyncNow={runSync}
+          onUploadOld={handleUploadOld}
+          onDownloadProblems={handleDownloadProblems}
+          onClearProblems={handleClearProblems}
+        />
+      )}
+
       {/* Main Content Area */}
       <main className="flex-1 pb-16">
         {currentView === 'survey' && (
@@ -116,24 +276,25 @@ export const App: React.FC = () => {
             language={language}
             onSubmit={handleSubmitResponse}
             onViewAnalytics={() => setCurrentView('wisn_calculator')}
-            onResetSurvey={handleResetSurvey}
+            onResetSurvey={handleRefreshSurvey}
             currentUser={currentUser}
           />
         )}
 
         {currentView === 'wisn_calculator' && (
           <WisnCalculator
+            key={configVersion}
             survey={survey}
             responses={responses}
           />
         )}
 
-        {currentView === 'builder' && (
+        {currentView === 'builder' && isAdmin && (
           <FormBuilder
             survey={survey}
             language={language}
             onSaveSurvey={handleSaveSurvey}
-            onResetDefault={handleResetSurvey}
+            onResetDefault={handleResetSurveyForAll}
           />
         )}
 
@@ -142,8 +303,7 @@ export const App: React.FC = () => {
             survey={survey}
             responses={responses}
             language={language}
-            onLoadMockData={handleLoadMockData}
-            onClearResponses={handleClearResponses}
+            onClearResponses={isAdmin ? handleClearResponses : undefined}
             onOpenExport={() => setIsExportModalOpen(true)}
           />
         )}
@@ -182,7 +342,7 @@ export const App: React.FC = () => {
         language={language}
       />
 
-      {/* Auth / Register Modal */}
+      {/* Login / accounts */}
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => {
@@ -193,16 +353,18 @@ export const App: React.FC = () => {
         currentUser={currentUser}
         onLoginSuccess={(user) => {
           setCurrentUser(user);
+          setSyncError(null);
           setIsAuthModalOpen(false);
         }}
       />
 
-      {/* Multi-Device Data Sync Modal */}
+      {/* Backup file / import */}
       <DataSyncModal
         isOpen={isSyncModalOpen}
         onClose={() => setIsSyncModalOpen(false)}
         survey={survey}
         responses={responses}
+        isAdmin={isAdmin}
         onMergeSuccess={(merged) => setResponses(merged)}
       />
     </div>

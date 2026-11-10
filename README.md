@@ -5,6 +5,18 @@
 
 ---
 
+## 🗄️ Where answers are stored (Google Sheet)
+
+All answers, accounts and the shared survey form are kept in one Google Sheet,
+through a small Google Apps Script web app ([`apps-script/Code.gs`](apps-script/Code.gs)).
+Logins and admin/interviewer rights are checked there, not in the page. Answers
+save on the device first and upload when there is internet.
+
+- Setup (once): [`docs/SETUP_GOOGLE_SHEETS.md`](docs/SETUP_GOOGLE_SHEETS.md), then put the web app URL in `src/config.ts`.
+- Local testing without Google: `npm run mock` and `npm run test:api`.
+
+---
+
 ## 🌟 ការកែលម្អថ្មីចុងក្រោយ (Latest Enhancements)
 
 1. **ការគណនារូបមន្ត WISN ស្តង់ដារ WHO ពេញលេញ (Full WHO WISN Engine):**

@@ -3,6 +3,7 @@ import { ResearchSurvey, Language, SurveyResponse, CustomTaskItem, WisnActivityC
 import { useTranslation } from '../i18n/translations';
 import { wisnActivityDefinitions, ActivityDefinition } from '../data/wisnDefinitions';
 import { parseTimeToMinutes } from '../utils/wisnCalculations';
+import { newResponseId } from '../utils/storage';
 import { 
   CheckCircle2, 
   AlertCircle, 
@@ -227,7 +228,8 @@ export const RespondentView: React.FC<RespondentViewProps> = ({
     if (!validateCurrentSection()) return;
 
     const completionTimeSeconds = Math.max(20, Math.round((Date.now() - startTime) / 1000));
-    const randomId = 'RESP-ST-' + (answers['staff_code'] || Math.floor(100 + Math.random() * 900));
+    // unique per interview; a repeated staff code is caught by the Sheet, not by the id
+    const randomId = newResponseId(currentUser?.interviewerCode || answers['interviewer_id'] || '', answers['staff_code'] || '');
 
     const responsePayload: SurveyResponse = {
       id: randomId,
@@ -251,7 +253,7 @@ export const RespondentView: React.FC<RespondentViewProps> = ({
   const handleRestart = () => {
     setAnswers({
       interview_date: new Date().toISOString().split('T')[0],
-      interviewer_id: 'K001',
+      interviewer_id: currentUser?.interviewerCode || '',
       awt_days_week: 5,
       awt_hours_day: 8,
       awt_annual_leave: 15,

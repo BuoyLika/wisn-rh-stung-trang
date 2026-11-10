@@ -148,6 +148,14 @@ export const ResponseListView: React.FC<ResponseListViewProps> = ({
                     <tr key={r.id} className="hover:bg-slate-50/70 transition">
                       <td className="py-4 px-5 font-black text-teal-700">
                         {r.staffCode}
+                        {r.syncStatus === 'pending' && (
+                          <span
+                            className="block mt-1 w-fit px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[10px] font-bold"
+                            title="Saved on this device, not uploaded to the Google Sheet yet"
+                          >
+                            ⏳ មិនទាន់បញ្ជូន (not uploaded)
+                          </span>
+                        )}
                       </td>
                       <td className="py-4 px-5 font-bold text-slate-900">
                         {r.staffName || <span className="text-slate-400 italic">មិនបានបញ្ជាក់</span>}

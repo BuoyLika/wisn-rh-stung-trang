@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { SurveyResponse, MergeResult, ResearchSurvey } from '../types';
-import { mergeResponses } from '../utils/storage';
+import { importResponses } from '../utils/storage';
+import { errorText } from '../utils/api';
 import { 
   Upload, 
   Download, 
@@ -17,6 +18,7 @@ interface DataSyncModalProps {
   onClose: () => void;
   survey: ResearchSurvey;
   responses: SurveyResponse[];
+  isAdmin: boolean;
   onMergeSuccess: (updatedList: SurveyResponse[]) => void;
 }
 
@@ -25,6 +27,7 @@ export const DataSyncModal: React.FC<DataSyncModalProps> = ({
   onClose,
   survey,
   responses,
+  isAdmin,
   onMergeSuccess,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -71,7 +74,7 @@ export const DataSyncModal: React.FC<DataSyncModalProps> = ({
     setIsProcessing(true);
     const reader = new FileReader();
 
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
         const text = event.target?.result as string;
         const parsed = JSON.parse(text);
@@ -89,16 +92,12 @@ export const DataSyncModal: React.FC<DataSyncModalProps> = ({
           throw new Error('ឯកសារ JSON នេះទទេ គ្មានចម្លើយណាត្រូវបានរកឃើញទេ (No responses in file)');
         }
 
-        const result = mergeResponses(incomingList, overwrite);
+        // Upload into the Google Sheet (keeps who interviewed; staff codes already there are skipped)
+        const { result, responses: merged } = await importResponses(incomingList, overwrite);
         setMergeResult(result);
-        
-        // Fetch updated responses from storage
-        const raw = localStorage.getItem('wisn_stung_trang_responses_v7');
-        if (raw) {
-          onMergeSuccess(JSON.parse(raw));
-        }
+        onMergeSuccess(merged);
       } catch (err: any) {
-        setErrorMsg(err.message || 'បរាជ័យក្នុងការអានឯកសារ JSON (Failed to parse JSON)');
+        setErrorMsg(err?.code ? errorText(err) : err?.message || 'បរាជ័យក្នុងការអានឯកសារ JSON (Failed to parse JSON)');
       } finally {
         setIsProcessing(false);
         if (fileInputRef.current) {
@@ -165,7 +164,8 @@ export const DataSyncModal: React.FC<DataSyncModalProps> = ({
             </button>
           </div>
 
-          {/* Action 2: Import & Merge */}
+          {/* Action 2: Import into the Google Sheet (admin only) */}
+          {isAdmin && (
           <div className="p-5 rounded-2xl bg-teal-50/60 border border-teal-200 space-y-3">
             <div>
               <h3 className="text-sm font-bold text-teal-950 flex items-center gap-1.5">
@@ -173,7 +173,7 @@ export const DataSyncModal: React.FC<DataSyncModalProps> = ({
                 <span>២. នាំចូល និងច្របាច់ទិន្នន័យ (Import & Merge Data from other Tablets)</span>
               </h3>
               <p className="text-xs text-teal-900/80 mt-1 leading-relaxed">
-                ជ្រើសរើសឯកសារ JSON ពី Tablet ផ្សេងទៀត។ ប្រព័ន្ធនឹងធ្វើការច្របាច់បញ្ចូលគ្នា (Auto-deduplicate) ដោយស្វ័យប្រវត្តិ។
+                ជ្រើសរើសឯកសារ JSON ពី Tablet ផ្សេងទៀត។ ចម្លើយនឹងត្រូវបញ្ចូលទៅក្នុង Google Sheet (Answers go into the Google Sheet; staff codes already there are skipped).
               </p>
             </div>
 
@@ -206,6 +206,7 @@ export const DataSyncModal: React.FC<DataSyncModalProps> = ({
               <span>{isProcessing ? 'កំពុងច្របាច់ទិន្នន័យ...' : 'ជ្រើសរើសឯកសារ JSON ដើម្បីច្របាច់ទិន្នន័យ'}</span>
             </button>
           </div>
+          )}
 
           {/* Merge Result Banner */}
           {mergeResult && (
