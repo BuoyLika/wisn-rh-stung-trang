@@ -12,33 +12,44 @@ export const defaultUsers: UserAccount[] = [
   {
     id: 'user-admin-01',
     username: 'admin',
-    password: 'admin123',
-    name: 'ប្រធានក្រុមស្រាវជ្រាវ (NIPH Lead)',
+    password: '',
+    name: 'ប្រធានក្រុមស្រាវជ្រាវ (NIPH Research Lead)',
     role: 'admin',
-    interviewerCode: 'ADM-01',
+    interviewerCode: 'K001',
     phone: '012 888 999',
-    organization: 'National Institute of Public Health (NIPH)',
+    organization: 'National Institute of Public Health (NIPH) & RH Stung Trang',
     createdAt: '2026-09-01T08:00:00.000Z'
   },
   {
     id: 'user-int-01',
     username: 'k001',
-    password: '123',
+    password: '',
     name: 'អ្នកសម្ភាសន៍ ក១ (Enumerator K001)',
-    role: 'interviewer',
+    role: 'admin',
     interviewerCode: 'K001',
-    phone: '097 555 1234',
+    phone: '',
     organization: 'RH Stung Trang Field Team',
     createdAt: '2026-09-10T08:00:00.000Z'
   },
   {
     id: 'user-int-02',
     username: 'k002',
-    password: '123',
+    password: '',
     name: 'អ្នកសម្ភាសន៍ ក២ (Enumerator K002)',
-    role: 'interviewer',
+    role: 'admin',
     interviewerCode: 'K002',
-    phone: '097 555 5678',
+    phone: '',
+    organization: 'RH Stung Trang Field Team',
+    createdAt: '2026-09-10T08:00:00.000Z'
+  },
+  {
+    id: 'user-int-03',
+    username: 'k003',
+    password: '',
+    name: 'អ្នកសម្ភាសន៍ ក៣ (Enumerator K003)',
+    role: 'admin',
+    interviewerCode: 'K003',
+    phone: '',
     organization: 'RH Stung Trang Field Team',
     createdAt: '2026-09-10T08:00:00.000Z'
   }
@@ -225,44 +236,42 @@ export const saveUsers = (users: UserAccount[]): void => {
   }
 };
 
-export const getCurrentUser = (): UserAccount | null => {
+export const getCurrentUser = (): UserAccount => {
   try {
-    // Clear legacy auto-admin session from older visits
-    localStorage.removeItem('wisn_stung_trang_current_user_v1');
-    
-    // Check current active session in sessionStorage
-    const raw = sessionStorage.getItem(CURRENT_USER_STORAGE_KEY);
+    const raw = localStorage.getItem(CURRENT_USER_STORAGE_KEY);
     if (raw) {
       return JSON.parse(raw);
     }
-    return null;
+    return defaultUsers[0];
   } catch (err) {
-    console.error('Failed to load current user:', err);
-    return null;
+    return defaultUsers[0];
   }
 };
 
 export const setCurrentUser = (user: UserAccount | null): void => {
-  if (!user) {
-    sessionStorage.removeItem(CURRENT_USER_STORAGE_KEY);
-    localStorage.removeItem(CURRENT_USER_STORAGE_KEY);
-    localStorage.removeItem('wisn_stung_trang_current_user_v1');
-  } else {
-    sessionStorage.setItem(CURRENT_USER_STORAGE_KEY, JSON.stringify(user));
+  if (user) {
+    localStorage.setItem(CURRENT_USER_STORAGE_KEY, JSON.stringify(user));
   }
 };
 
-export const loginUser = (username: string, password: string): { success: boolean; user?: UserAccount; error?: string } => {
+export const loginUser = (username: string, _password?: string): { success: boolean; user?: UserAccount; error?: string } => {
   const users = getSavedUsers();
   const found = users.find((u) => u.username.toLowerCase() === username.trim().toLowerCase());
-  if (!found) {
-    return { success: false, error: 'រកមិនឃើញគណនីនេះទេ (Account not found)' };
+  if (found) {
+    setCurrentUser(found);
+    return { success: true, user: found };
   }
-  if (found.password && found.password !== password) {
-    return { success: false, error: 'ពាក្យសម្ងាត់មិនត្រឹមត្រូវ (Invalid password)' };
-  }
-  setCurrentUser(found);
-  return { success: true, user: found };
+  const newUser: UserAccount = {
+    id: `user-${Date.now()}`,
+    username: username.trim().toLowerCase(),
+    name: `អ្នកសម្ភាសន៍ ${username.toUpperCase()}`,
+    role: 'admin',
+    interviewerCode: username.toUpperCase(),
+    createdAt: new Date().toISOString()
+  };
+  saveUsers([...users, newUser]);
+  setCurrentUser(newUser);
+  return { success: true, user: newUser };
 };
 
 export const registerUser = (userData: Omit<UserAccount, 'id' | 'createdAt'>): { success: boolean; user?: UserAccount; error?: string } => {

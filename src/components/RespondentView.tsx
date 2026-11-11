@@ -31,7 +31,7 @@ interface RespondentViewProps {
   onSubmit: (response: SurveyResponse) => void;
   onViewAnalytics: () => void;
   onResetSurvey?: () => void;
-  currentUser?: UserAccount | null;
+  currentUser?: UserAccount;
 }
 
 export const RespondentView: React.FC<RespondentViewProps> = ({

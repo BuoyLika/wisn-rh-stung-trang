@@ -10,8 +10,7 @@ import {
   deleteResponse,
   clearAllResponses, 
   seedMockResponses,
-  getCurrentUser,
-  logoutUser
+  getCurrentUser
 } from './utils/storage';
 import { Navbar } from './components/Navbar';
 import { RespondentView } from './components/RespondentView';
@@ -30,16 +29,10 @@ export const App: React.FC = () => {
   const [responses, setResponses] = useState<SurveyResponse[]>(getSavedResponses);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
-  // Authentication & Multi-Device Sync state
-  const [currentUser, setCurrentUser] = useState<UserAccount | null>(getCurrentUser);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(() => !getCurrentUser());
+  // Active Interviewer state (Default to K001, completely open access)
+  const [currentUser, setCurrentUser] = useState<UserAccount>(getCurrentUser);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
-
-  const handleLogout = () => {
-    logoutUser();
-    setCurrentUser(null);
-    setIsAuthModalOpen(true);
-  };
 
   // Force upgrade if browser has outdated survey schema cached
   useEffect(() => {
@@ -105,7 +98,6 @@ export const App: React.FC = () => {
         currentUser={currentUser}
         onOpenAuth={() => setIsAuthModalOpen(true)}
         onOpenSync={() => setIsSyncModalOpen(true)}
-        onLogout={handleLogout}
       />
 
       {/* Main Content Area */}
@@ -182,14 +174,10 @@ export const App: React.FC = () => {
         language={language}
       />
 
-      {/* Auth / Register Modal */}
+      {/* Interviewer Code Switcher Modal */}
       <AuthModal
         isOpen={isAuthModalOpen}
-        onClose={() => {
-          if (currentUser) {
-            setIsAuthModalOpen(false);
-          }
-        }}
+        onClose={() => setIsAuthModalOpen(false)}
         currentUser={currentUser}
         onLoginSuccess={(user) => {
           setCurrentUser(user);
