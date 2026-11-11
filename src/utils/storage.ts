@@ -243,16 +243,30 @@ const getSession = (): Session | null => readJson<Session | null>(SESSION_KEY, n
 
 export const getToken = (): string | null => (OFFLINE_MODE ? null : getSession()?.token || null);
 
-/** The logged-in user, or null. Kept on the device, so it works offline. */
-export const getCurrentUser = (): UserAccount | null => {
+const DEFAULT_USER: UserAccount = {
+  id: 'user-default-01',
+  username: 'k001',
+  name: 'អ្នកសម្ភាសន៍ (Enumerator K001)',
+  role: 'admin',
+  interviewerCode: 'K001',
+  createdAt: ''
+};
+
+/** The logged-in user. Default to active interviewer account (No login block). */
+export const getCurrentUser = (): UserAccount => {
   if (OFFLINE_MODE) {
     const p = getOfflineProfile();
-    return p
-      ? { id: 'local-' + p.interviewerCode, username: 'local', name: p.name, role: 'admin', interviewerCode: p.interviewerCode, createdAt: '' }
-      : null;
+    return {
+      id: 'local-' + (p?.interviewerCode || 'K001'),
+      username: 'local',
+      name: p?.name || 'អ្នកសម្ភាសន៍ K001',
+      role: 'admin',
+      interviewerCode: p?.interviewerCode || 'K001',
+      createdAt: ''
+    };
   }
   const s = getSession();
-  return s?.token ? s.user : null;
+  return s?.user || DEFAULT_USER;
 };
 
 export const loginUser = async (
@@ -385,14 +399,12 @@ const doSync = async (): Promise<SyncResult> => {
   const done = (extra: Partial<SyncResult> = {}): SyncResult => ({
     responses: getSavedResponses(), uploaded, newProblems, pending: getPendingCount(), ...extra,
   });
-  if (!token) return done({ error: new ApiError('Please log in', 'auth') });
-
   try {
     let outbox = getOutbox();
     while (outbox.length) {
       const batch = outbox.slice(0, 25);
       const res = await apiCall<{ results: { id: string; status: string; existingId?: string }[] }>(
-        'submit', { mode: 'queue', responses: batch }, token
+        'submit', { mode: 'queue', responses: batch, interviewerCode: getCurrentUser().interviewerCode }, token
       );
       const settled = new Set<string>();
       const now = new Date().toISOString();

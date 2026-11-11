@@ -49,8 +49,8 @@ export const App: React.FC = () => {
   // bumps when the shared settings arrive, so the calculator reloads them
   const [configVersion, setConfigVersion] = useState(0);
 
-  const [currentUser, setCurrentUser] = useState<UserAccount | null>(getCurrentUser);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(() => !getCurrentUser());
+  const [currentUser, setCurrentUser] = useState<UserAccount>(getCurrentUser);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
 
   // upload state shown in the bar under the menu
@@ -72,8 +72,8 @@ export const App: React.FC = () => {
     setSyncError(r.error || null);
     if (!r.error) setLastSync(new Date());
     if (r.error?.code === 'auth') {
-      setCurrentUser(null);
-      setIsAuthModalOpen(true);
+      setCurrentUser(getCurrentUser());
+      setIsAuthModalOpen(false);
     }
   }, []);
 
@@ -137,12 +137,12 @@ export const App: React.FC = () => {
       if (!ok) return;
     }
     await logoutUser();
-    setCurrentUser(null);
+    setCurrentUser(getCurrentUser());
     setResponses([]);
     setPending(0);
     setSyncError(null);
     setLastSync(null);
-    setIsAuthModalOpen(true);
+    setIsAuthModalOpen(false);
   };
 
   const handleSubmitResponse = (newResponse: SurveyResponse) => {
