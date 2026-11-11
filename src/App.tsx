@@ -302,7 +302,7 @@ export const App: React.FC = () => {
             onSubmit={handleSubmitResponse}
             onViewAnalytics={() => setCurrentView('wisn_calculator')}
             onResetSurvey={handleRefreshSurvey}
-            currentUser={currentUser}
+            currentUser={currentUser || undefined}
           />
         )}
 
@@ -340,7 +340,7 @@ export const App: React.FC = () => {
             language={language}
             onUpdateResponse={handleUpdateResponse}
             onDeleteResponse={handleDeleteResponse}
-            currentUser={currentUser}
+            currentUser={currentUser || undefined}
             onOpenSync={() => setIsSyncModalOpen(true)}
           />
         )}
