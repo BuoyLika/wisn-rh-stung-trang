@@ -7,7 +7,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        khmer: ['"Kantumruy Pro"', '"Battambang"', 'sans-serif'],
+        khmer: ['"Kantumruy Pro"', '"Battambang"', '"Khmer UI"', '"Leelawadee UI"', '"Noto Sans Khmer"', 'sans-serif'],
       },
       colors: {
         primary: {

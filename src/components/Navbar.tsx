@@ -1,4 +1,5 @@
 import React from 'react';
+import { OFFLINE_MODE } from '../config';
 import { AppView, Language, UserAccount } from '../types';
 import { useTranslation } from '../i18n/translations';
 import { 
@@ -11,7 +12,10 @@ import {
   GraduationCap,
   Calculator,
   User,
-  Tablet
+  ShieldCheck,
+  Tablet,
+  LogIn,
+  LogOut
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -21,10 +25,10 @@ interface NavbarProps {
   setLanguage: (lang: Language) => void;
   responseCount: number;
   onOpenExport: () => void;
-  currentUser: UserAccount;
+  currentUser: UserAccount | null;
   onOpenAuth: () => void;
   onOpenSync: () => void;
-  onLogout?: () => void;
+  onLogout: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -37,16 +41,19 @@ export const Navbar: React.FC<NavbarProps> = ({
   currentUser,
   onOpenAuth,
   onOpenSync,
+  onLogout,
 }) => {
   const t = useTranslation(language);
 
-  // All 5 platforms views always available
+  // If interviewer, hide or show builder differently
   const navItems: { id: AppView; label: string; icon: React.ReactNode; badge?: number }[] = [
     { id: 'survey', label: t.navSurvey, icon: <FileText className="w-4 h-4" /> },
     { id: 'wisn_calculator', label: (t as any).navWisn || 'គណនា WISN', icon: <Calculator className="w-4 h-4" /> },
     { id: 'analytics', label: t.navAnalytics, icon: <BarChart3 className="w-4 h-4" /> },
     { id: 'responses', label: t.navResponses, icon: <ListFilter className="w-4 h-4" />, badge: responseCount },
-    { id: 'builder', label: t.navBuilder, icon: <Settings2 className="w-4 h-4" /> },
+    ...(currentUser?.role === 'admin'
+      ? [{ id: 'builder' as AppView, label: t.navBuilder, icon: <Settings2 className="w-4 h-4" /> }]
+      : []),
   ];
 
   return (
@@ -61,7 +68,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-bold text-slate-900 text-base sm:text-lg tracking-tight">
-                  {language === 'km' ? 'ប្រព័ន្ធកម្រងសំណួរស្រាវជ្រាវ' : 'Research Questionnaire'}
+                  WISN Tools Project
                 </span>
                 <span className="px-2 py-0.5 text-[10px] font-semibold bg-teal-100 text-teal-800 rounded-full uppercase tracking-wider">
                   v1.0 Pro
@@ -74,7 +81,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* Navigation Tabs */}
-          <nav className="hidden md:flex items-center space-x-1 bg-slate-100/80 p-1 rounded-xl">
+          <nav className="hidden xl:flex items-center space-x-1 bg-slate-100/80 p-1 rounded-xl">
             {navItems.map((item) => {
               const active = currentView === item.id;
               return (
@@ -113,15 +120,45 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="hidden lg:inline">Sync Tablet</span>
             </button>
 
-            {/* Active Interviewer Selector */}
-            <button
-              onClick={onOpenAuth}
-              className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-teal-200 bg-teal-50 hover:bg-teal-100 text-teal-800 transition shadow-2xs"
-              title="ចុចដើម្បីប្តូរ ឬកំណត់លេខកូដអ្នកសម្ភាសន៍ (Switch Interviewer ID)"
-            >
-              <User className="w-3.5 h-3.5 text-teal-700" />
-              <span>កូដអ្នកសម្ភាសន៍៖ <strong className="font-bold text-teal-900">{currentUser?.interviewerCode || 'K001'}</strong></span>
-            </button>
+            {/* User Account / Login Pill */}
+            {currentUser ? (
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={onOpenAuth}
+                  className={`flex items-center space-x-1.5 px-2.5 py-1.5 text-xs font-bold rounded-lg border transition shadow-2xs ${
+                    currentUser.role === 'admin'
+                      ? 'bg-slate-900 border-slate-900 text-teal-400 hover:bg-slate-800'
+                      : 'bg-emerald-50 border-emerald-300 text-emerald-900 hover:bg-emerald-100'
+                  }`}
+                  title="ប្តូរគណនី / មើលព័ត៌មាន (Switch Account)"
+                >
+                  {currentUser.role === 'admin' ? (
+                    <ShieldCheck className="w-3.5 h-3.5 text-teal-400" />
+                  ) : (
+                    <User className="w-3.5 h-3.5 text-emerald-700" />
+                  )}
+                  <span className="max-w-[120px] truncate">
+                    {OFFLINE_MODE || currentUser.role !== 'admin' ? currentUser.interviewerCode : 'Admin'}
+                  </span>
+                </button>
+                <button
+                  onClick={onLogout}
+                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg border border-transparent hover:border-rose-200 transition"
+                  title="ចាកចេញ (Logout)"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={onOpenAuth}
+                className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-teal-600 hover:bg-teal-500 text-white shadow-sm transition animate-pulse"
+                title="ចូលប្រើប្រព័ន្ធ (Login)"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                <span>ចូលប្រើ (Login)</span>
+              </button>
+            )}
 
             {/* Language Switcher */}
             <button
@@ -139,13 +176,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="flex items-center space-x-1.5 px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg bg-teal-600 hover:bg-teal-700 text-white transition shadow-sm shadow-teal-600/20 active:scale-95"
             >
               <Download className="w-4 h-4" />
-              <span className="hidden sm:inline">{t.exportBtn}</span>
+              <span className="hidden 2xl:inline">{t.exportBtn}</span>
             </button>
           </div>
         </div>
 
         {/* Mobile Navigation Bar */}
-        <div className="md:hidden flex items-center justify-around py-2 border-t border-slate-100 overflow-x-auto">
+        <div className="xl:hidden flex items-center justify-around py-2 border-t border-slate-100 overflow-x-auto">
           {navItems.map((item) => {
             const active = currentView === item.id;
             return (

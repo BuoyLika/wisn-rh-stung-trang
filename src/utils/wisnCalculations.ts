@@ -245,6 +245,111 @@ export function calculateHospitalBreakdown(
   };
 }
 
+export interface AwtInputs {
+  daysPerWeek: number;
+  hoursPerDay: number;
+  annualLeave: number;
+  holidays: number;
+  sickLeave: number;
+  specialLeave: number;
+  trainingDays: number;
+}
+
+/** Reads one respondent's Available Working Time answers, with the survey's defaults. */
+export function readAwtInputs(r: SurveyResponse): AwtInputs {
+  let trainingDays = 3;
+  const rawTraining = String(r.answers['awt_training_days'] || '');
+  if (rawTraining.includes('48h')) trainingDays = 6;
+  else if (!isNaN(Number(rawTraining)) && Number(rawTraining) > 0) trainingDays = Number(rawTraining);
+
+  return {
+    daysPerWeek: Number(r.answers['awt_days_week']) || 5,
+    hoursPerDay: Number(r.answers['awt_hours_day']) || 8,
+    annualLeave: Number(r.answers['awt_annual_leave']) || 0,
+    holidays: Number(r.answers['awt_holidays']) || 22,
+    sickLeave: Number(r.answers['awt_sick_leave']) || 0,
+    specialLeave: Number(r.answers['awt_special_leave']) || 0,
+    trainingDays,
+  };
+}
+
+export interface WisnCadreConfig {
+  cadre: string;
+  dept: string;
+  defaultActual: number;
+  defaultAwtHours: number;
+  defaultCasPercent: number;
+  defaultIasHours: number;
+  indicatorIds: string[];
+}
+
+/** Cadres mapped to their relevant clinical indicators */
+export const WISN_CADRE_CONFIGS: WisnCadreConfig[] = [
+  {
+    cadre: 'Medical Assistant / Doctor',
+    dept: 'OPD / Emergency / NCD',
+    defaultActual: 4,
+    defaultAwtHours: 1832,
+    defaultCasPercent: 18,
+    defaultIasHours: 160,
+    indicatorIds: ['ind-opd-consult', 'ind-opd-ncd', 'ind-er-resus', 'ind-eye-consult']
+  },
+  {
+    cadre: 'Secondary Nurse',
+    dept: 'Inpatient Wards & ER',
+    defaultActual: 12,
+    defaultAwtHours: 1760,
+    defaultCasPercent: 22,
+    defaultIasHours: 210,
+    indicatorIds: ['ind-ipd-admissions', 'ind-ipd-daily-care', 'ind-er-resus']
+  },
+  {
+    cadre: 'Secondary Midwife',
+    dept: 'Maternity & OPD OB/GYN',
+    defaultActual: 8,
+    defaultAwtHours: 1680,
+    defaultCasPercent: 25,
+    defaultIasHours: 240,
+    indicatorIds: ['ind-mat-deliv', 'ind-mat-skin', 'ind-mat-pnc', 'ind-mat-anc', 'ind-mat-via']
+  },
+  {
+    cadre: 'Lab Technician',
+    dept: 'Laboratory',
+    defaultActual: 3,
+    defaultAwtHours: 1800,
+    defaultCasPercent: 20,
+    defaultIasHours: 150,
+    indicatorIds: ['ind-lab-cbc', 'ind-lab-afb']
+  },
+  {
+    cadre: 'Secondary Pharmacist',
+    dept: 'Pharmacy',
+    defaultActual: 3,
+    defaultAwtHours: 1800,
+    defaultCasPercent: 18,
+    defaultIasHours: 180,
+    indicatorIds: ['ind-pharm-dispense']
+  },
+  {
+    cadre: 'Ambulance Driver',
+    dept: 'Emergency Referral & Logistics',
+    defaultActual: 2,
+    defaultAwtHours: 1920,
+    defaultCasPercent: 15,
+    defaultIasHours: 100,
+    indicatorIds: ['ind-referral-ambulance']
+  },
+  {
+    cadre: 'Cleaner',
+    dept: 'Hygiene, CSSD & Waste',
+    defaultActual: 4,
+    defaultAwtHours: 1920,
+    defaultCasPercent: 20,
+    defaultIasHours: 80,
+    indicatorIds: ['ind-cssd-sterilize', 'ind-waste-incinerator']
+  }
+];
+
 /**
  * Calculates Full WHO WISN Staffing Requirements for RH Stung Trang
  * Formulates:
@@ -270,17 +375,8 @@ export function calculateWhoWisnModels(
     if (!awtByCadre[cadre]) {
       awtByCadre[cadre] = { totalHours: 0, count: 0 };
     }
-    const daysPerWeek = Number(r.answers['awt_days_week']) || 5;
-    const hoursPerDay = Number(r.answers['awt_hours_day']) || 8;
-    const annualLeave = Number(r.answers['awt_annual_leave']) || 0;
-    const holidays = Number(r.answers['awt_holidays']) || 22;
-    const sickLeave = Number(r.answers['awt_sick_leave']) || 0;
-    const specialLeave = Number(r.answers['awt_special_leave']) || 0;
-    
-    let trainingDays = 3;
-    const rawTraining = String(r.answers['awt_training_days'] || '');
-    if (rawTraining.includes('48h')) trainingDays = 6;
-    else if (!isNaN(Number(rawTraining)) && Number(rawTraining) > 0) trainingDays = Number(rawTraining);
+    const { daysPerWeek, hoursPerDay, annualLeave, holidays, sickLeave, specialLeave, trainingDays } =
+      readAwtInputs(r);
 
     const totalWorkDaysYear = Math.round(52 * daysPerWeek);
     const nonWorkingDays = annualLeave + holidays + sickLeave + specialLeave + trainingDays;
@@ -295,74 +391,7 @@ export function calculateWhoWisnModels(
   const cadreBreakdowns = calculateCadreBreakdowns(responses, survey);
   const breakdownMap = new Map(cadreBreakdowns.map((b) => [b.cadre, b]));
 
-  // Cadres mapped to their relevant clinical indicators
-  const cadreConfigs = [
-    {
-      cadre: 'Medical Assistant / Doctor',
-      dept: 'OPD / Emergency / NCD',
-      defaultActual: 4,
-      defaultAwtHours: 1832,
-      defaultCasPercent: 18,
-      defaultIasHours: 160,
-      indicatorIds: ['ind-opd-consult', 'ind-opd-ncd', 'ind-er-resus', 'ind-eye-consult']
-    },
-    {
-      cadre: 'Secondary Nurse',
-      dept: 'Inpatient Wards & ER',
-      defaultActual: 12,
-      defaultAwtHours: 1760,
-      defaultCasPercent: 22,
-      defaultIasHours: 210,
-      indicatorIds: ['ind-ipd-admissions', 'ind-ipd-daily-care', 'ind-er-resus']
-    },
-    {
-      cadre: 'Secondary Midwife',
-      dept: 'Maternity & OPD OB/GYN',
-      defaultActual: 8,
-      defaultAwtHours: 1680,
-      defaultCasPercent: 25,
-      defaultIasHours: 240,
-      indicatorIds: ['ind-mat-deliv', 'ind-mat-skin', 'ind-mat-pnc', 'ind-mat-anc', 'ind-mat-via']
-    },
-    {
-      cadre: 'Lab Technician',
-      dept: 'Laboratory',
-      defaultActual: 3,
-      defaultAwtHours: 1800,
-      defaultCasPercent: 20,
-      defaultIasHours: 150,
-      indicatorIds: ['ind-lab-cbc', 'ind-lab-afb']
-    },
-    {
-      cadre: 'Secondary Pharmacist',
-      dept: 'Pharmacy',
-      defaultActual: 3,
-      defaultAwtHours: 1800,
-      defaultCasPercent: 18,
-      defaultIasHours: 180,
-      indicatorIds: ['ind-pharm-dispense']
-    },
-    {
-      cadre: 'Ambulance Driver',
-      dept: 'Emergency Referral & Logistics',
-      defaultActual: 2,
-      defaultAwtHours: 1920,
-      defaultCasPercent: 15,
-      defaultIasHours: 100,
-      indicatorIds: ['ind-referral-ambulance']
-    },
-    {
-      cadre: 'Cleaner',
-      dept: 'Hygiene, CSSD & Waste',
-      defaultActual: 4,
-      defaultAwtHours: 1920,
-      defaultCasPercent: 20,
-      defaultIasHours: 80,
-      indicatorIds: ['ind-cssd-sterilize', 'ind-waste-incinerator']
-    }
-  ];
-
-  return cadreConfigs.map((cfg) => {
+  return WISN_CADRE_CONFIGS.map((cfg) => {
     const actualStaff = staffOverrides[cfg.cadre] !== undefined ? staffOverrides[cfg.cadre] : cfg.defaultActual;
     
     // AWT calculation

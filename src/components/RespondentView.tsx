@@ -3,6 +3,7 @@ import { ResearchSurvey, Language, SurveyResponse, CustomTaskItem, WisnActivityC
 import { useTranslation } from '../i18n/translations';
 import { wisnActivityDefinitions, ActivityDefinition } from '../data/wisnDefinitions';
 import { parseTimeToMinutes } from '../utils/wisnCalculations';
+import { newResponseId } from '../utils/storage';
 import { 
   CheckCircle2, 
   AlertCircle, 
@@ -72,6 +73,8 @@ export const RespondentView: React.FC<RespondentViewProps> = ({
   }, [currentUser]);
   const [customTasks, setCustomTasks] = useState<CustomTaskItem[]>([]);
   const [errors, setErrors] = useState<Record<string, boolean>>({});
+  // required questions left empty when Next/Submit was pressed (shown above the buttons)
+  const [missing, setMissing] = useState<Question[]>([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [startTime, setStartTime] = useState<number>(Date.now());
   const [filterByDept, setFilterByDept] = useState(false);
@@ -83,9 +86,10 @@ export const RespondentView: React.FC<RespondentViewProps> = ({
     }
   }, [started]);
 
-  // Reset tier tab when section changes
+  // Reset tier tab and the missing list when section changes
   useEffect(() => {
     setActiveTierTab('all');
+    setMissing([]);
   }, [currentSectionIndex]);
 
   // Relevant sections
@@ -145,6 +149,7 @@ export const RespondentView: React.FC<RespondentViewProps> = ({
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
     if (errors[questionId]) {
       setErrors((prev) => ({ ...prev, [questionId]: false }));
+      setMissing((prev) => prev.filter((q) => q.id !== questionId));
     }
   };
 
@@ -203,7 +208,19 @@ export const RespondentView: React.FC<RespondentViewProps> = ({
     });
 
     setErrors(newErrors);
+    const missingList = sectionQuestions.filter((q) => newErrors[q.id]);
+    setMissing(missingList);
+    if (hasError) {
+      // show every question (a tier tab may hide the empty one), then go to the first empty one
+      setActiveTierTab('all');
+      setTimeout(() => scrollToQuestion(missingList[0]?.id), 50);
+    }
     return !hasError;
+  };
+
+  const scrollToQuestion = (id?: string) => {
+    if (!id) return;
+    document.getElementById(`q-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
   const handleNextSection = () => {
@@ -227,7 +244,8 @@ export const RespondentView: React.FC<RespondentViewProps> = ({
     if (!validateCurrentSection()) return;
 
     const completionTimeSeconds = Math.max(20, Math.round((Date.now() - startTime) / 1000));
-    const randomId = 'RESP-ST-' + (answers['staff_code'] || Math.floor(100 + Math.random() * 900));
+    // unique per interview; a repeated staff code is caught by the Sheet, not by the id
+    const randomId = newResponseId(currentUser?.interviewerCode || answers['interviewer_id'] || '', answers['staff_code'] || '');
 
     const responsePayload: SurveyResponse = {
       id: randomId,
@@ -251,7 +269,7 @@ export const RespondentView: React.FC<RespondentViewProps> = ({
   const handleRestart = () => {
     setAnswers({
       interview_date: new Date().toISOString().split('T')[0],
-      interviewer_id: 'K001',
+      interviewer_id: currentUser?.interviewerCode || '',
       awt_days_week: 5,
       awt_hours_day: 8,
       awt_annual_leave: 15,
@@ -403,7 +421,8 @@ export const RespondentView: React.FC<RespondentViewProps> = ({
     return (
       <div
         key={q.id}
-        className={`bg-white rounded-2xl p-5 sm:p-6 border transition-all duration-200 shadow-sm ${
+        id={`q-${q.id}`}
+        className={`bg-white rounded-2xl p-5 sm:p-6 border transition-all duration-200 shadow-sm scroll-mt-24 ${
           hasError
             ? 'border-rose-400 ring-2 ring-rose-100'
             : 'border-slate-200 hover:border-teal-200'
@@ -998,6 +1017,31 @@ export const RespondentView: React.FC<RespondentViewProps> = ({
                 {otherQuestions.map((q, idx) => renderQuestionCard(q, idx))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Required questions still empty */}
+        {missing.length > 0 && (
+          <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs sm:text-sm space-y-2">
+            <div className="font-bold">
+              សូមឆ្លើយសំណួរចាំបាច់ {missing.length} ដែលមានពណ៌ក្រហម មុននឹងបន្ត
+              <span className="block font-semibold text-rose-700/90">
+                Please answer the {missing.length} required question{missing.length > 1 ? 's' : ''} in red to continue:
+              </span>
+            </div>
+            <ul className="flex flex-wrap gap-2">
+              {missing.map((q) => (
+                <li key={q.id}>
+                  <button
+                    type="button"
+                    onClick={() => scrollToQuestion(q.id)}
+                    className="px-2.5 py-1 rounded-lg bg-white border border-rose-200 hover:bg-rose-100 text-left"
+                  >
+                    {q.titleKm.length > 60 ? q.titleKm.slice(0, 60) + '…' : q.titleKm}
+                  </button>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 

@@ -88,6 +88,8 @@ export interface SurveyResponse {
   cadre?: string;
   answers: Record<string, any>;
   customTasks?: CustomTaskItem[];
+  /** Only on this device: 'pending' = saved here, not uploaded to the Sheet yet. */
+  syncStatus?: 'pending';
 }
 
 export type Language = 'km' | 'en';
@@ -132,6 +134,7 @@ export interface UserAccount {
   interviewerCode: string;
   phone?: string;
   organization?: string;
+  active?: boolean;
   createdAt: string;
 }
 

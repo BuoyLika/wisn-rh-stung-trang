@@ -11,6 +11,7 @@ import {
   resetHO2Indicators 
 } from '../utils/storage';
 import { exportToExcel } from '../utils/exportUtils';
+import { downloadWisnStudy } from '../utils/wisnExport';
 import { ExecutiveReportModal } from './ExecutiveReportModal';
 import { 
   Calculator, 
@@ -21,6 +22,7 @@ import {
   Stethoscope,
   FileCheck2,
   Download,
+  FileDown,
   RotateCcw,
   Sliders,
   Sparkles
@@ -180,6 +182,18 @@ export const WisnCalculator: React.FC<WisnCalculatorProps> = ({
             >
               <Download className="w-4 h-4" />
               <span>ទាញយក Excel (Full WISN)</span>
+            </button>
+            <button
+              onClick={() =>
+                downloadWisnStudy(responses, survey, effectiveIndicators, staffOverrides).catch((err) =>
+                  alert(`Could not build the WISN file: ${err instanceof Error ? err.message : err}`)
+                )
+              }
+              title="Open this file in the WHO WISN Automated Tool: Open an existing study"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs backdrop-blur border border-white/20 transition shadow-sm"
+            >
+              <FileDown className="w-4 h-4" />
+              <span>ទាញយកឯកសារ WISN Tool (.wat)</span>
             </button>
           </div>
         </div>

@@ -5,7 +5,6 @@ import {
   Users, 
   Clock, 
   Download, 
-  RefreshCw, 
   Trash2, 
   CheckCircle,
   FileSpreadsheet,
@@ -37,8 +36,7 @@ interface AnalyticsDashboardProps {
   survey: ResearchSurvey;
   responses: SurveyResponse[];
   language: Language;
-  onLoadMockData: () => void;
-  onClearResponses: () => void;
+  onClearResponses?: () => void;
   onOpenExport: () => void;
 }
 
@@ -48,7 +46,6 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   survey,
   responses,
   language,
-  onLoadMockData,
   onClearResponses,
   onOpenExport,
 }) => {
@@ -176,28 +173,11 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {responses.length === 0 ? (
-            <button
-              onClick={onLoadMockData}
-              className="inline-flex items-center px-4 py-2 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-bold transition border border-teal-200"
-            >
-              <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
-              {t.loadMockData}
-            </button>
-          ) : (
+          {responses.length > 0 && onClearResponses && (
             <>
               <button
-                onClick={onLoadMockData}
-                className="inline-flex items-center px-3 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold transition"
-                title="Add more sample data"
-              >
-                <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
-                <span>+25 Mock Data</span>
-              </button>
-
-              <button
                 onClick={() => {
-                  if (confirm(t.confirmClearResponses)) {
+                  if (confirm(t.confirmClearResponses + "\n\n(All answers move to the Sheet's 'Deleted' tab.)")) {
                     onClearResponses();
                   }
                 }}
@@ -267,13 +247,6 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-sm">
           <Users className="w-12 h-12 text-slate-300 mx-auto mb-3" />
           <h3 className="text-base font-bold text-slate-800 mb-2">{t.noResponsesYet}</h3>
-          <button
-            onClick={onLoadMockData}
-            className="mt-2 inline-flex items-center px-5 py-2.5 rounded-xl bg-teal-600 text-white font-bold text-xs shadow-md hover:bg-teal-700 transition"
-          >
-            <RefreshCw className="w-4 h-4 mr-2" />
-            {t.loadMockData}
-          </button>
         </div>
       ) : (
         <div className="space-y-8">
