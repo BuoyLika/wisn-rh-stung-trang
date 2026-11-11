@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ទម្រង់ស្ទង់មតិបន្ទុកការងារ WISN - មន្ទីរពេទ្យបង្អែក ហ៊ុន សែន ស្ទឹងត្រង់</title>
+  <title>កម្រងសំណួរស្ទង់មតិបន្ទុកការងារ WHO WISN - មន្ទីរពេទ្យបង្អែក</title>
   
   <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -36,10 +36,10 @@
         </div>
         <div>
           <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">
-            កម្រងសំណួរ WISN សុខាភិបាល
+            កម្រងសំណួរ WISN សុខាភិបាល (ទម្រង់ដើម ១៨ ផ្នែក)
           </h1>
           <p class="text-[11px] text-teal-700 font-semibold">
-            មន្ទីរពេទ្យបង្អែក ហ៊ុន សែន ស្ទឹងត្រង់ (NIPH & RH Stung Trang)
+            Workload Indicators of Staffing Need (WHO Standard - RH Assessment)
           </p>
         </div>
       </div>
@@ -48,7 +48,7 @@
         <!-- Sync Status Button -->
         <button onclick="openSyncModal()" id="btn-sync-status" class="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border border-teal-200 bg-teal-50 text-teal-800 hover:bg-teal-100 transition shadow-xs">
           <i data-lucide="cloud" class="w-3.5 h-3.5 text-teal-600"></i>
-          <span id="sync-status-badge">Google Sheet: មិនទាន់ភ្ជាប់</span>
+          <span id="sync-status-badge">Google Sheet: បានភ្ជាប់</span>
         </button>
 
         <!-- View Responses Button -->
@@ -63,23 +63,7 @@
   <!-- ================= MAIN CONTAINER ================= -->
   <main class="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 space-y-6">
 
-    <!-- Cloud Sync Alert Bar -->
-    <div id="cloud-alert-box" class="p-4 rounded-2xl border bg-amber-50 border-amber-200 text-amber-900 flex items-start justify-between gap-3 shadow-xs">
-      <div class="flex items-start gap-2.5">
-        <i data-lucide="info" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
-        <div class="text-xs space-y-0.5">
-          <div class="font-bold">ព័ត៌មានអំពីការរក្សាទុកទិន្នន័យ (Cloud Sync)</div>
-          <div class="text-amber-800">
-            រាល់ពេលលោកអ្នកចុច "រក្សាទុក" ទិន្នន័យនឹងត្រូវរក្សាទុកក្នុង Tablet នេះជានិច្ច (Offline Safe)។ ដើម្បីឱ្យទិន្នន័យរត់ចូល Google Sheet ដោយស្វ័យប្រវត្តិកុំឱ្យបាត់ សូមភ្ជាប់ Link Google Sheet របស់អ្នក។
-          </div>
-        </div>
-      </div>
-      <button onclick="openSyncModal()" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl shrink-0 transition">
-        ភ្ជាប់ Google Sheet
-      </button>
-    </div>
-
-    <!-- SUCCESS NOTIFICATION -->
+    <!-- SUCCESS NOTIFICATION BANNER -->
     <div id="success-banner" class="hidden p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center justify-between shadow-md animate-in fade-in">
       <div class="flex items-center gap-3">
         <div class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0">
@@ -98,12 +82,15 @@
     <!-- FORM START -->
     <form id="wisn-form" onsubmit="handleFormSubmit(event)" class="space-y-6">
 
-      <!-- SECTION 1: ព័ត៌មានទូទៅ -->
+      <!-- SECTION 1: ព័ត៌មានទូទៅ និងអត្តសញ្ញាណ -->
       <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
         <div class="border-b border-slate-100 pb-4 flex items-center justify-between">
           <div class="flex items-center gap-3">
             <span class="w-7 h-7 rounded-lg bg-teal-100 text-teal-800 flex items-center justify-center text-xs font-black">១</span>
-            <h2 class="text-base sm:text-lg font-bold text-slate-900">ព័ត៌មានទូទៅ និងអត្តសញ្ញាណ (General Information)</h2>
+            <div>
+              <h2 class="text-base sm:text-lg font-bold text-slate-900">ព័ត៌មានទូទៅ និងអត្តសញ្ញាណបុគ្គលិក</h2>
+              <p class="text-xs text-slate-500">Institution & Health Facility Staff Profile</p>
+            </div>
           </div>
           <span class="text-xs text-rose-500 font-semibold">* ចាំបាច់</span>
         </div>
@@ -121,7 +108,7 @@
 
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1.5">លេខកូដសម្គាល់បុគ្គលិក (Staff Code) <span class="text-rose-500">*</span></label>
-            <input type="text" id="staffCode" placeholder="ឧ. 001, 002, ST-10" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-semibold text-slate-900 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20">
+            <input type="text" id="staffCode" placeholder="ឧ. 001, 002, 003" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-semibold text-slate-900 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20">
           </div>
 
           <div>
@@ -138,51 +125,58 @@
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1.5">លេខទូរស័ព្ទ (Phone)</label>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5">លេខទូរស័ព្ទ (Phone Number)</label>
             <input type="text" id="staffPhone" placeholder="ឧ. 012 345 678" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium text-slate-900 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20">
+          </div>
+
+          <!-- 18 OFFICIAL WISN DEPARTMENTS -->
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold text-slate-700 mb-1.5">ផ្នែក / កន្លែងបំពេញការងារ (Department / Unit) <span class="text-rose-500">*</span></label>
+            <select id="department" onchange="updateDepartmentQuestions()" required class="w-full px-3.5 py-2.5 rounded-xl border border-teal-300 bg-teal-50/40 text-xs sm:text-sm font-bold text-teal-950 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20">
+              <option value="001. Director">001. Director (ប្រធានមន្ទីរពេទ្យ)</option>
+              <option value="002. Vice-Director">002. Vice-Director (អនុប្រធានមន្ទីរពេទ្យ)</option>
+              <option value="003. OPD" selected>003. ផ្នែកពិគ្រោះជំងឺក្រៅ (OPD)</option>
+              <option value="004. Eye Care Center">004. មជ្ឈមណ្ឌលរបកគំហើញ - Eye Care Center (ផ្នែកភ្នែក)</option>
+              <option value="005. General Medicine">005. ផ្នែកជំងឺទូទៅសម្រាកពេទ្យ (General Medicine - IPD)</option>
+              <option value="006. Pediatrics">006. ផ្នែកជំងឺកុមារ (Pediatrics)</option>
+              <option value="007. GYOB">007. ផ្នែកសម្ភព និងរោគស្រ្តី (GYOB)</option>
+              <option value="008. Surgery">008. ផ្នែកវះកាត់ និងក្រោយវះកាត់ (Surgery Department)</option>
+              <option value="009. CD/TB/HIV">009. ផ្នែកជំងឺឆ្លង របេង និងអេដស៍ (CD/TB/HIV)</option>
+              <option value="010. Laboratory">010. ផ្នែកមន្ទីរពិសោធន៍ (Laboratory)</option>
+              <option value="011. Pharmacy">011. ផ្នែកឱសថស្ថាន (Pharmacy Department)</option>
+              <option value="012. Oral Health">012. ផ្នែកសុខភាពមាត់ធ្មេញ (Oral Health & Dental)</option>
+              <option value="013. Medical Imaging">013. ផ្នែករូបភាពវេជ្ជសាស្រ្ត (Medical Imaging - X-Ray/Echo)</option>
+              <option value="014. Administration">014. ផ្នែករដ្ឋបាល-គណនេយ្យ-ហិរញ្ញវត្ថុ-ផែនការប្រព័ន្ធព័ត៌មាន (Admin & Finance)</option>
+              <option value="015. Kitchen">015. ផ្នែកដាំស្ល (Kitchen / Cooking)</option>
+              <option value="016. Cleaning">016. កម្មករសំអាត (Cleaning & Hygiene)</option>
+              <option value="017. Security">017. សន្តិសុខ (Security)</option>
+              <option value="018. Ambulance">018. រថយន្តសង្គ្រោះ (Ambulance)</option>
+            </select>
           </div>
 
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1.5">មុខតំណែង / ក្របខ័ណ្ឌ (Cadre) <span class="text-rose-500">*</span></label>
             <select id="cadre" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-semibold text-slate-900 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20">
-              <option value="Medical Doctor">វេជ្ជបណ្ឌិត (Medical Doctor)</option>
+              <option value="Doctor">វេជ្ជបណ្ឌិត (Doctor)</option>
               <option value="Medical Assistant">ជំនួយការវេជ្ជបណ្ឌិត (Medical Assistant)</option>
+              <option value="Secondary Nurse" selected>គិលានុបដ្ឋាកមធ្យម (Secondary Nurse)</option>
+              <option value="Bachelor Nurse">បរិញ្ញាបត្រគិលានុបដ្ឋាក (Bachelor Nurse)</option>
               <option value="Primary Nurse">គិលានុបដ្ឋាកបឋម (Primary Nurse)</option>
-              <option value="Secondary Nurse">គិលានុបដ្ឋាកមធ្យម (Secondary Nurse)</option>
-              <option value="Bachelor Nurse">គិលានុបដ្ឋាកបរិញ្ញាបត្រ (Bachelor Nurse)</option>
-              <option value="Primary Midwife">ឆ្មบบឋម (Primary Midwife)</option>
               <option value="Secondary Midwife">ឆ្មបមធ្យម (Secondary Midwife)</option>
-              <option value="Bachelor Midwife">ឆ្មบบរិញ្ញាបត្រ (Bachelor Midwife)</option>
+              <option value="Bachelor Midwife">បរិញ្ញាបត្រឆ្មប (Bachelor Midwife)</option>
+              <option value="Primary Midwife">ឆ្មบบឋម (Primary Midwife)</option>
+              <option value="Physiotherapist">ព្យាបាលចលនា (Physiotherapist)</option>
+              <option value="Pharmacist">ឱសថការី (Pharmacist)</option>
               <option value="Secondary Pharmacist">ឱសថការីមធ្យម (Secondary Pharmacist)</option>
               <option value="Lab Technician">បច្ចេកទេសមន្ទីរពិសោធន៍ (Lab Technician)</option>
-              <option value="Ambulance Driver">អ្នកបើកបររថយន្តសង្គ្រោះ (Ambulance Driver)</option>
-              <option value="Admin & Support">បុគ្គលិករដ្ឋបាល / គណនេយ្យ / ជំនួយការ</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1.5">ផ្នែក / កន្លែងបំពេញការងារចម្បង (Department) <span class="text-rose-500">*</span></label>
-            <select id="department" onchange="updateDepartmentQuestions()" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-semibold text-slate-900 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20">
-              <option value="OPD General">ផ្នែកពិគ្រោះជំងឺក្រៅទូទៅ (OPD General Clinic)</option>
-              <option value="OPD OB/GYN">ផ្នែកពិនិត្យជំងឺក្រៅសម្ភព និងរោគស្ត្រី (OPD OB/GYN Clinic)</option>
-              <option value="Emergency (ER)">ផ្នែកសង្គ្រោះបន្ទាន់ (Emergency / ICU)</option>
-              <option value="Inpatient (IPD)">ផ្នែកជំងឺទូទៅសម្រាកពេទ្យ (IPD Medical/Surgical)</option>
-              <option value="Maternity & Delivery">ផ្នែកសម្ភព និងសម្រាល (Delivery Room / Maternity)</option>
-              <option value="Pediatrics">ផ្នែកកុមារ (Pediatrics Ward)</option>
-              <option value="Eye Clinic">ផ្នែកភ្នែក (Eye Clinic / Ophthalmology)</option>
-              <option value="Laboratory">ផ្នែកមន្ទីរពិសោធន៍ (Laboratory)</option>
-              <option value="Pharmacy">ផ្នែកឱសថស្ថាន (Pharmacy)</option>
-              <option value="CSSD & Infection Control">ផ្នែកសម្លាប់មេរោគ និងសំអាត (CSSD & IPC)</option>
-              <option value="Ambulance Referral">ផ្នែករថយន្តសង្គ្រោះបន្ទាន់ (Ambulance Referral)</option>
-              <option value="Administration">ផ្នែករដ្ឋបាល និងគណនេយ្យ (Administration & Finance)</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1.5">តើមានបំពេញការងារនៅផ្នែកទីពីរ (Dual Role) ដែរឬទេ? <span class="text-rose-500">*</span></label>
-            <select id="hasSecondDept" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-semibold text-slate-900 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20">
-              <option value="No">ទេ - បំពេញការងារតែផ្នែកខាងលើប៉ុណ្ណោះ (Single Dept)</option>
-              <option value="Yes">បាទ/ចាស - មានបំពេញការងារនៅផ្នែកផ្សេងទៀត (Dual Role)</option>
+              <option value="Dentist">ទន្ដបណ្ឌិត (Dentist)</option>
+              <option value="Dental Nurse">ទន្ដ.គិលានុបដ្ឋាកមធ្យម (Dental Nurse)</option>
+              <option value="Radiographer">បច្ចេកទេសវិទ្យុសាស្ដ្រ (Radiographer)</option>
+              <option value="Nurse Anesthetist">គិលានុបដ្ឋាកសណ្ដំ (Nurse Anesthetist)</option>
+              <option value="Accountant">គណនេយ្យ / ហិរញ្ញវត្ថុ (Accountant / Finance)</option>
+              <option value="IT Staff">ព័ត៌មានវិទ្យា (IT / Computer Science)</option>
+              <option value="Admin Staff">រដ្ឋបាល (Administration)</option>
+              <option value="Support Staff">កម្មករ / សន្តិសុខ / អ្នកបើកបរ / ដាំស្ល</option>
             </select>
           </div>
 
@@ -194,105 +188,96 @@
               <option value="Hospital Hired">បុគ្គលិកជួលដោយមន្ទីរពេទ្យ (Hospital Hired)</option>
             </select>
           </div>
-
-          <div class="sm:col-span-2">
-            <label class="block text-xs font-bold text-slate-700 mb-1.5">បទពិសោធន៍ការងារនៅមន្ទីរពេទ្យបង្អែកស្ទឹងត្រង់ (Experience)</label>
-            <select id="experience" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-semibold text-slate-900 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20">
-              <option value="< 1 year">តិចជាង ១ ឆ្នាំ (< 1 year)</option>
-              <option value="1 - 3 years">១ ដល់ ៣ ឆ្នាំ (1 - 3 years)</option>
-              <option value="3 - 5 years">៣ ដល់ ៥ ឆ្នាំ (3 - 5 years)</option>
-              <option value="> 5 years">លើសពី ៥ ឆ្នាំ (> 5 years)</option>
-            </select>
-          </div>
         </div>
       </div>
 
-      <!-- SECTION 2: AVAILABLE WORKING TIME (AWT) -->
+      <!-- SECTION 2: ពេលវេលាបំពេញការងារជាក់ស្តែង (AWT) -->
       <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
         <div class="border-b border-slate-100 pb-4">
           <div class="flex items-center gap-3">
             <span class="w-7 h-7 rounded-lg bg-teal-100 text-teal-800 flex items-center justify-center text-xs font-black">២</span>
             <div>
               <h2 class="text-base sm:text-lg font-bold text-slate-900">ពេលវេលាបំពេញការងារជាក់ស្តែង (Available Working Time - AWT)</h2>
-              <p class="text-xs text-slate-500">គណនាពេលវេលាជាក់ស្តែងតាមរូបមន្តស្តង់ដារអង្គការសុខភាពពិភពលោក (WHO WISN)</p>
+              <p class="text-xs text-slate-500">តាមទម្រង់របាយការណ៍ដើម WISN មន្ទីរពេទ្យបង្អែក (Working days = 216 days, 1728 hrs/yr)</p>
             </div>
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">ថ្ងៃធ្វើការក្នុងមួយសប្តាហ៍ (A) [ថ្ងៃ/សប្តាហ៍]</label>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Working Days Per Week [ថ្ងៃ/សប្តាហ៍]</label>
             <input type="number" id="awtDaysWeek" value="5" min="1" max="7" oninput="calculateAWT()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-bold text-slate-900 focus:border-teal-500 focus:ring-2">
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">ម៉ោងធ្វើការក្នុងមួយថ្ងៃ (B) [ម៉ោង/ថ្ងៃ]</label>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Working Hours Per Day [ម៉ោង/ថ្ងៃ]</label>
             <input type="number" id="awtHoursDay" value="8" min="1" max="24" oninput="calculateAWT()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-bold text-slate-900 focus:border-teal-500 focus:ring-2">
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">ច្បាប់សម្រាកប្រចាំឆ្នាំ (C) [ថ្ងៃ/ឆ្នាំ]</label>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Annual Leave (ច្បាប់ប្រចាំឆ្នាំ) [ថ្ងៃ/ឆ្នាំ]</label>
             <input type="number" id="awtAnnualLeave" value="15" min="0" max="60" oninput="calculateAWT()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-bold text-slate-900 focus:border-teal-500 focus:ring-2">
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">ថ្ងៃបុណ្យជាតិជាផ្លូវការ (D) [ថ្ងៃ/ឆ្នាំ]</label>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Public Holidays (បុណ្យជាតិ) [ថ្ងៃ/ឆ្នាំ]</label>
             <input type="number" id="awtHolidays" value="22" min="0" max="40" oninput="calculateAWT()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-bold text-slate-900 focus:border-teal-500 focus:ring-2">
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">ច្បាប់ឈឺជាក់ស្តែង (E) [ថ្ងៃ/ឆ្នាំ]</label>
-            <input type="number" id="awtSickLeave" value="0" min="0" max="60" oninput="calculateAWT()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-bold text-slate-900 focus:border-teal-500 focus:ring-2">
+            <label class="block text-xs font-bold text-slate-700 mb-1">Sick Leave (ច្បាប់ឈឺ) [ថ្ងៃ/ឆ្នាំ]</label>
+            <input type="number" id="awtSickLeave" value="5" min="0" max="60" oninput="calculateAWT()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-bold text-slate-900 focus:border-teal-500 focus:ring-2">
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">ច្បាប់ផ្សេងៗ/ពិសេស (F) [ថ្ងៃ/ឆ្នាំ]</label>
-            <input type="number" id="awtSpecialLeave" value="0" min="0" max="60" oninput="calculateAWT()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-bold text-slate-900 focus:border-teal-500 focus:ring-2">
+            <label class="block text-xs font-bold text-slate-700 mb-1">Special No Notice Leave (ច្បាប់ពិសេស) [ថ្ងៃ/ឆ្នាំ]</label>
+            <input type="number" id="awtSpecialLeave" value="2" min="0" max="60" oninput="calculateAWT()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-bold text-slate-900 focus:border-teal-500 focus:ring-2">
           </div>
 
           <div class="sm:col-span-2 lg:col-span-3">
-            <label class="block text-xs font-bold text-slate-700 mb-1">ថ្ងៃចូលរួមវគ្គបណ្តុះបណ្តាល ឬសិក្ខាសាលា (G) [ថ្ងៃ/ឆ្នាំ]</label>
-            <input type="number" id="awtTrainingDays" value="3" min="0" max="60" oninput="calculateAWT()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-bold text-slate-900 focus:border-teal-500 focus:ring-2">
+            <label class="block text-xs font-bold text-slate-700 mb-1">Training Days Per Year (វគ្គបណ្តុះបណ្តាល) [ថ្ងៃ/ឆ្នាំ]</label>
+            <input type="number" id="awtTrainingDays" value="0" min="0" max="60" oninput="calculateAWT()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-bold text-slate-900 focus:border-teal-500 focus:ring-2">
           </div>
         </div>
 
         <!-- Live Computed AWT Result Card -->
         <div class="p-4 rounded-2xl bg-teal-50 border border-teal-200 text-teal-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <div class="text-xs font-bold text-teal-700 uppercase tracking-wider">លទ្ធផលគណនា AWT ស្វ័យប្រវត្ត (WHO Standard):</div>
+            <div class="text-xs font-bold text-teal-700 uppercase tracking-wider">លទ្ធផលគណនា AWT ស្តង់ដារ (Exact WISN Formula):</div>
             <div class="text-xs text-teal-800 mt-0.5">
-              ថ្ងៃធ្វើការជាក់ស្តែងក្នុងមួយឆ្នាំ = <span id="disp-awt-days" class="font-bold">220</span> ថ្ងៃ/ឆ្នាំ
+              Non-Working Days = <span id="disp-non-working-days" class="font-bold">44</span> ថ្ងៃ | 
+              Working Days = <span id="disp-awt-days" class="font-bold">216</span> ថ្ងៃ (43.2 សប្តាហ៍)
             </div>
           </div>
           <div class="text-right">
-            <div class="text-2xl font-black text-teal-800"><span id="disp-awt-hours">1,760</span> <span class="text-sm font-semibold">ម៉ោង/ឆ្នាំ</span></div>
+            <div class="text-2xl font-black text-teal-800"><span id="disp-awt-hours">1,728</span> <span class="text-sm font-semibold">ម៉ោង/ឆ្នាំ</span></div>
             <div class="text-[10px] text-teal-600">Available Working Time (AWT)</div>
           </div>
         </div>
       </div>
 
-      <!-- SECTION 3: បន្ទុកការងារ (WISN 3-TIER ACTIVITIES) -->
+      <!-- SECTION 3: បន្ទុកការងារតាមផ្នែកជាក់ស្តែង (CORE, CAS, IAS) -->
       <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
         <div class="border-b border-slate-100 pb-4 flex items-center justify-between">
           <div class="flex items-center gap-3">
             <span class="w-7 h-7 rounded-lg bg-teal-100 text-teal-800 flex items-center justify-center text-xs font-black">៣</span>
             <div>
-              <h2 class="text-base sm:text-lg font-bold text-slate-900">សកម្មភាពបន្ទុកការងារ (Workload Activities)</h2>
-              <p class="text-xs text-slate-500" id="current-dept-label">ផ្នែក៖ ពិគ្រោះជំងឺក្រៅទូទៅ (OPD)</p>
+              <h2 class="text-base sm:text-lg font-bold text-slate-900">សកម្មភាពបន្ទុកការងារតាមផ្នែក (Workload Activities)</h2>
+              <p class="text-xs text-slate-500" id="current-dept-label">ផ្នែក៖ 003. ផ្នែកពិគ្រោះជំងឺក្រៅ (OPD)</p>
             </div>
           </div>
-          <span class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-teal-100 text-teal-800">WHO 3-Tiers</span>
+          <span class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-teal-100 text-teal-800">Original Template</span>
         </div>
 
-        <!-- 3-Tier Dynamic Questions Container -->
+        <!-- Dynamic Questions Container -->
         <div id="dynamic-workload-container" class="space-y-6">
-          <!-- Dynamic activities injected by Javascript -->
+          <!-- Populated by JS -->
         </div>
 
-        <!-- Custom Inline Tasks Section -->
+        <!-- Custom Inline Tasks -->
         <div class="pt-4 border-t border-slate-200 space-y-3">
           <div class="flex items-center justify-between">
-            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">សកម្មភាពបន្ថែមដែលគ្មានក្នុងបញ្ជី (Custom Tasks):</label>
+            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">សកម្មភាពបន្ថែមផ្សេងៗទៀត (Add Extra Task):</label>
             <button type="button" onclick="addCustomTask()" class="px-3 py-1.5 rounded-xl border border-teal-300 bg-teal-50 text-teal-800 hover:bg-teal-100 text-xs font-bold flex items-center gap-1.5 transition">
               <i data-lucide="plus" class="w-3.5 h-3.5"></i>
               <span>+ បន្ថែមសកម្មភាពផ្ទាល់</span>
@@ -307,8 +292,8 @@
       <!-- SUBMIT BUTTON -->
       <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
-          <div class="text-xs font-bold text-slate-900">សូមពិនិត្យព័ត៌មានឱ្យបានត្រឹមត្រូវមុនចុចរក្សាទុក</div>
-          <div class="text-[11px] text-slate-500">ទិន្នន័យនឹងត្រូវរក្សាទុកក្នុង Tablet នេះភ្លាមៗ និង Sync ទៅកាន់ Google Sheet។</div>
+          <div class="text-xs font-bold text-slate-900">ទិន្នន័យត្រូវបានការពារដោយស្វ័យប្រវត្តិ (Offline & Cloud Sync)</div>
+          <div class="text-[11px] text-slate-500">ចុចរក្សាទុកដើម្បីកត់ត្រាចម្លើយ និងរុញចូល Google Sheet ដោយផ្ទាល់។</div>
         </div>
         <button type="submit" id="btn-submit" class="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-sm shadow-lg shadow-teal-600/20 flex items-center justify-center gap-2 transition">
           <i data-lucide="save" class="w-4 h-4"></i>
@@ -334,7 +319,7 @@
 
       <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
         <div class="text-xs text-slate-600">
-          ទិន្នន័យទាំងអស់ត្រូវបានរក្សាទុកក្នុងអង្គចងចាំនៃ Browser នេះ។
+          ទិន្នន័យមានសុវត្ថិភាពក្នុងអង្គចងចាំនៃ Browser នេះ។
         </div>
         <div class="flex items-center gap-2">
           <button onclick="exportToCSV()" class="px-3 py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-2xs">
@@ -371,20 +356,12 @@
 
       <div class="p-6 space-y-4">
         <div class="text-xs text-slate-600 leading-relaxed">
-          សូមបញ្ចូល <strong>Web App URL</strong> នៃ Google Apps Script ដែលលោកអ្នកបាន Deploy ពី Google Sheet ដើម្បីឱ្យរាល់ពេលបំពេញចម្លើយ ទិន្នន័យរត់ចូល Google Sheet ភ្លាមៗ៖
+          Google Sheet Web App URL សម្រាប់បញ្ជូនទិន្នន័យ (បានកំណត់ស្រាប់)៖
         </div>
 
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">Google Apps Script Web App URL:</label>
           <input type="url" id="google-sheet-url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono focus:border-teal-500 focus:ring-2">
-        </div>
-
-        <div class="p-3.5 rounded-2xl bg-teal-50 border border-teal-200 text-teal-900 text-xs space-y-1">
-          <div class="font-bold flex items-center gap-1.5">
-            <i data-lucide="check-circle-2" class="w-4 h-4 text-teal-600"></i>
-            <span>កូដ Apps Script ត្រូវបានរៀបចំរួចជាស្រេច!</span>
-          </div>
-          <div>កូដសម្រាប់ Paste ក្នុង Apps Script មាននៅក្នុងឯកសារ <code>google_sheets_script.js</code>។</div>
         </div>
 
         <div class="pt-2 flex items-center justify-end gap-2">
@@ -395,76 +372,386 @@
     </div>
   </div>
 
-  <!-- JAVASCRIPT APPLICATION LOGIC -->
+  <!-- COMPLETE 18-DEPARTMENT WISN DATA TEMPLATES -->
   <script>
-    // Storage keys
     const STORAGE_RESPONSES = 'wisn_stung_trang_html_responses_v1';
     const STORAGE_GSHEET_URL = 'wisn_stung_trang_gsheet_url_v1';
+    const DEFAULT_GSHEET_URL = 'https://script.google.com/macros/s/AKfycbx4Lm0frwS7Zk16-uX2r6SwLs1RPA2YKyjjziWyEq6kFa8FZ8gkj0avc47JxDyKHodyEw/exec';
 
-    // 17 Standard Department Task Templates
-    const DEPT_TEMPLATES = {
-      'OPD General': {
-        name: 'ផ្នែកពិគ្រោះជំងឺក្រៅទូទៅ (OPD General Clinic)',
-        core: [
-          { id: 'opd_consult', name: 'ការពិគ្រោះជំងឺក្រៅទូទៅ (HO2: 12,000 ករណី/ឆ្នាំ)', defaultMin: 12 },
-          { id: 'opd_ncd', name: 'ការពិគ្រោះជំងឺរ៉ាំរ៉ៃ NCD (ទឹកនោមផ្អែម/លើសឈាម - HO2: 3,450 ករណី)', defaultMin: 18 },
-          { id: 'opd_wound', name: 'ការលាងរបួស និងដេររបួសតូចតាច', defaultMin: 20 }
-        ],
+    // 18 OFFICIAL WISN DEPARTMENTS BASED ON INSTITUTION FULL REPORT
+    const WISN_DEPARTMENTS = {
+      '001. Director': {
+        name: '001. Director (ប្រធានមន្ទីរពេទ្យ)',
+        core: [],
         cas: [
-          { id: 'opd_handover', name: 'ការប្រគល់-ទទួលវេន និងប្រជុំការងារព្រឹក', defaultCas: 30 },
-          { id: 'opd_ipc', name: 'ការសម្អាត និងគ្រប់គ្រងការចម្លងរោគ (IPC) ក្នុងបន្ទប់ពិគ្រោះ', defaultCas: 25 }
+          { id: 'dir_monthly', name: 'ប្រជុំប្រចាំខែ', defaultVal: 0, unit: 'hours/month' }
         ],
         ias: [
-          { id: 'opd_reg', name: 'ការកត់ត្រាសៀវភៅបញ្ជីពិគ្រោះ និងចេញវេជ្ជបញ្ជា', defaultIas: 3.5 },
-          { id: 'opd_ho2_entry', name: 'ការបញ្ចូលទិន្នន័យរបាយការណ៍សេវា HO2 ប្រចាំខែ', defaultIas: 2.0 }
+          { id: 'dir_morning', name: 'ប្រជុំពេលព្រឹក', defaultVal: 30, unit: 'mins/day' },
+          { id: 'dir_finance', name: 'សាកសួរ ផ្ទៀងផ្ទាត់ចំណូលចំណាយប្រចាំថ្ងៃ', defaultVal: 60, unit: 'mins/day' },
+          { id: 'dir_phd_meeting', name: 'ប្រជុំប្រចាំខែ នៅមន្ទីរសុខាភិបាលខេត្ត', defaultVal: 4, unit: 'hours/month' },
+          { id: 'dir_admin_rev', name: 'ពិនិត្យមើលការងាររដ្ឋបាល និង ហិរញ្ញវត្ថុ', defaultVal: 30, unit: 'mins/day' },
+          { id: 'dir_staff_alloc', name: 'បែកចែក និងពិនិត្យមើលបុគ្គលិក តាមផ្នែក', defaultVal: 30, unit: 'mins/day' },
+          { id: 'dir_mission', name: 'ចូលរួមប្រជុំ បេសកម្ម ផ្សេងៗ នៅតាមបណ្ដាលខេត្ត រាជធានី', defaultVal: 26, unit: 'days/year' },
+          { id: 'dir_hmt', name: 'ប្រជុំ គណៈកម្មការគ្រប់គ្រង មន្ទីរពេទ្យបង្អែក HMT', defaultVal: 1, unit: 'hours/month' },
+          { id: 'dir_attendance', name: 'ត្រួតពិនិត្យវត្តមាន បុគ្គលិក ប្រចាំថ្ងៃ (ក្នុងបញ្ជី និងពិនិត្យផ្ទាល់)', defaultVal: 30, unit: 'mins/day' },
+          { id: 'dir_action_plan', name: 'ពិនិត្យ និងចាត់ចែក លទ្ធផលក្រោយប្រជុំ (ធ្វើការសម្រេចចិត្ត និងដាក់អោយអនុវត្ត)', defaultVal: 120, unit: 'mins/day' },
+          { id: 'dir_od_meeting', name: 'ប្រជុំនៅ OD', defaultVal: 4, unit: 'hours/month' }
         ]
       },
-      'OPD OB/GYN': {
-        name: 'ផ្នែកពិនិត្យជំងឺក្រៅសម្ភព និងរោគស្ត្រី (OPD OB/GYN Clinic)',
-        core: [
-          { id: 'ob_anc', name: 'ការពិនិត្យផ្ទៃពោះ ANC (HO2: 1,420 ករណី/ឆ្នាំ)', defaultMin: 25 },
-          { id: 'ob_echo', name: 'ការពិនិត្យអេកូសាស្ត្រសម្ភព (Obstetric Ultrasound)', defaultMin: 20 },
-          { id: 'ob_via', name: 'ការពិនិត្យមហារីកមាត់ស្បូន VIA (HO2: 480 ករណី)', defaultMin: 25 },
-          { id: 'ob_fp', name: 'សេវាពន្យារកំណើត (កងក្នុងស្បូន/កងក្រោមស្បែក/ចាក់)', defaultMin: 20 }
-        ],
+
+      '002. Vice-Director': {
+        name: '002. Vice-Director (អនុប្រធានមន្ទីរពេទ្យ)',
+        core: [],
         cas: [
-          { id: 'ob_counsel', name: 'ការប្រឹក្សាយោបល់អាហារូបត្ថម្ភ និងការថែទាំគភ៌ជាក្រុម', defaultCas: 35 },
-          { id: 'ob_prep', name: 'ការរៀបចំសម្ភារៈ និងឧបករណ៍ពិនិត្យសម្ភព', defaultCas: 25 }
+          { id: 'vdir_monthly', name: 'ប្រជុំប្រចាំខែ', defaultVal: 0, unit: 'hours/month' }
         ],
         ias: [
-          { id: 'ob_reg', name: 'ការកត់ត្រាសៀវភៅ ANC និងប័ណ្ណសុខភាពមាតា-ទារក', defaultIas: 4.0 },
-          { id: 'ob_report', name: 'ការបូកសរុបរបាយការណ៍សុខភាពបន្តពូជប្រចាំខែ', defaultIas: 2.0 }
+          { id: 'vdir_morning', name: 'ប្រជុំពេលព្រឹក', defaultVal: 30, unit: 'mins/day' },
+          { id: 'vdir_financing', name: 'ប្រជុំគណៈកម្មការសេវាហិរញ្ញប្បទានមន្ទីរពេទ្យបង្អែក', defaultVal: 2, unit: 'hours/month' },
+          { id: 'vdir_quality', name: 'ប្រជុំគណៈកម្មការទទួលស្គាល់គុណភាព និង លើកកំពស់ សុត្ថិភាព អ្នកជំងឺ', defaultVal: 1, unit: 'hours/year' },
+          { id: 'vdir_grievance', name: 'ប្រជុំ គណៈកម្មការប្រមូលទិន្នន័យការត្អូញត្អែល ឬ សំណូមពររបស់អ្នកជំងឺ គ្រួសារអ្នកជំងឺ ឬ អង្គភាពពាក់ព័ន្ធ', defaultVal: 90, unit: 'hours/month' },
+          { id: 'vdir_mission', name: 'ចូលរួមប្រជុំ បេសកម្ម ផ្សេងៗ នៅតាមបណ្ដាលខេត្ត រាជធានី', defaultVal: 17, unit: 'days/year' },
+          { id: 'vdir_hmt', name: 'ប្រជុំ គណៈកម្មការគ្រប់គ្រង មន្ទីរពេទ្យបង្អែក HMT', defaultVal: 1, unit: 'hours/month' }
         ]
       },
-      'Emergency (ER)': {
-        name: 'ផ្នែកសង្គ្រោះបន្ទាន់ (Emergency / ICU)',
+
+      '003. OPD': {
+        name: '003. ផ្នែកពិគ្រោះជំងឺក្រៅ (OPD)',
         core: [
-          { id: 'er_triage', name: 'ការវាយតម្លៃ និងសង្គ្រោះបន្ទាន់កម្រិតស្រាល-មធ្យម (HO2: 2,100 ករណី)', defaultMin: 35 },
-          { id: 'er_critical', name: 'ការសង្គ្រោះបន្ទាន់ធ្ងន់ធ្ងរ Resuscitation / CPR', defaultMin: 60 },
-          { id: 'er_procedure', name: 'ការដាក់សុងបូម និងសុងនោម ឬចាក់ថ្នាំតាមសរសៃ', defaultMin: 20 }
+          { id: 'opd_ref_rh', name: 'បញ្ជូនជំងឺទៅ RH', defaultVal: 120, unit: 'min/patient' },
+          { id: 'opd_get_hc', name: 'យកជំងឺពី HC មកមន្ទីរពេទ្យ', defaultVal: 60, unit: 'min/patient' },
+          { id: 'opd_general_consult', name: 'ពិគ្រោះ និងព្យាបាលជំងឺក្រៅទូទៅ', defaultVal: 15, unit: 'min/patient' },
+          { id: 'opd_ncd_consult', name: 'ពិគ្រោះជំងឺរ៉ាំរ៉ៃ NCD (ទឹកនោមផ្អែម/លើសឈាម)', defaultVal: 20, unit: 'min/patient' },
+          { id: 'opd_wound_care', name: 'ការលាងរបួស និងដេររបួស', defaultVal: 25, unit: 'min/patient' }
         ],
-        cas: [
-          { id: 'er_standby', name: 'ការប្រចាំការត្រៀមទទួលអ្នកជំងឺសង្គ្រោះបន្ទាន់ (Standby Duty)', defaultCas: 45 },
-          { id: 'er_sterilize', name: 'ការត្រួតពិនិត្យឧបករណ៍សង្គ្រោះ និងប្តូរបំពង់អុកស៊ីសែន', defaultCas: 30 }
-        ],
+        cas: [],
         ias: [
-          { id: 'er_log', name: 'ការកត់ត្រាបញ្ជីចូល និងធ្វើលិខិតបញ្ជូន (Referral Sheet)', defaultIas: 4.5 }
+          { id: 'opd_attend', name: 'ចុះវត្តមាន', defaultVal: 10, unit: 'mins/day' },
+          { id: 'opd_finance_comm', name: 'ប្រជុំគណៈកម្មការសេវាហិរញ្ញប្បទានមន្ទីរពេទ្យបង្អែក', defaultVal: 2, unit: 'hours/month' },
+          { id: 'opd_file_doc', name: 'យក និងទុកដាក់ឯកសាអ្នកជំងឺ', defaultVal: 22.5, unit: 'mins/day' },
+          { id: 'opd_grievance', name: 'ប្រជុំ គណៈកម្មការប្រមូលទិន្នន័យការត្អូញត្អែល ឬ សំណូមពររបស់អ្នកជំងឺ', defaultVal: 90, unit: 'hours/month' },
+          { id: 'opd_mission', name: 'ចូលរួមប្រជុំ បេសកម្ម ផ្សេងៗ នៅតាមបណ្ដាលខេត្ត រាជធានី', defaultVal: 11, unit: 'days/year' },
+          { id: 'opd_clean_finance', name: 'Clean ហិរញ្ញប្បទាន ជាមួយគណនេយ្យប្រចាំថ្ងៃ', defaultVal: 15, unit: 'mins/day' },
+          { id: 'opd_report', name: 'Report ប្រចាំខែ', defaultVal: 0.25, unit: 'hours/week' }
         ]
       },
-      'Eye Clinic': {
-        name: 'ផ្នែកភ្នែក (Eye Clinic / Ophthalmology)',
+
+      '004. Eye Care Center': {
+        name: '004. មជ្ឈមណ្ឌលរបកគំហើញ - Eye Care Center (ផ្នែកភ្នែក)',
         core: [
-          { id: 'eye_consult', name: 'ការពិគ្រោះជំងឺភ្នែកទូទៅ (HO2: 60 ករណី/ឆ្នាំ)', defaultMin: 20 },
-          { id: 'eye_snellen', name: 'ការវាស់គំហើញ Snellen Chart & Auto-refractor', defaultMin: 15 },
-          { id: 'eye_slitlamp', name: 'ការពិនិត្យដោយ Slit-Lamp & Tonometry វាស់សម្ពាធភ្នែក', defaultMin: 20 },
-          { id: 'eye_foreign', name: 'ការលាងសម្អាត និងឆ្កឹះកម្ទេចកំទីភ្នែក (Foreign body removal)', defaultMin: 25 }
+          { id: 'eye_ref_rh', name: 'បញ្ជូនអ្នកជំងឺទៅ RH', defaultVal: 120, unit: 'min/patient' },
+          { id: 'eye_consult', name: 'ការពិគ្រោះជំងឺភ្នែកទូទៅ', defaultVal: 20, unit: 'min/patient' },
+          { id: 'eye_snellen', name: 'ការវាស់គំហើញ Snellen Chart & Auto-refractor', defaultVal: 15, unit: 'min/patient' },
+          { id: 'eye_slitlamp', name: 'ការពិនិត្យ Slit-Lamp & Tonometry វាស់សម្ពាធភ្នែក', defaultVal: 20, unit: 'min/patient' },
+          { id: 'eye_foreign', name: 'ការលាងសម្អាត និងឆ្កឹះកម្ទេចកំទីភ្នែក', defaultVal: 25, unit: 'min/patient' }
+        ],
+        cas: [],
+        ias: [
+          { id: 'eye_req_supplies', name: 'ស្នើសុំសំភារៈប្រើប្រាស់ប្រចាំសប្ដាហ៍', defaultVal: 0.08, unit: 'hours/week' },
+          { id: 'eye_roster', name: 'ធ្វើតារាងវេនយាមប្រចាំខែ', defaultVal: 0.5, unit: 'hours/month' },
+          { id: 'eye_roles', name: 'រៀបចំតួនាទីបុគ្គលិក', defaultVal: 24, unit: 'hours/year' },
+          { id: 'eye_hygiene_req', name: 'ស្នើសុំសំភារៈអនាម័យប្រចាំខែ', defaultVal: 0.5, unit: 'hours/month' },
+          { id: 'eye_daily_rep', name: 'ធ្វើរបាយការណ៍ប្រចាំថ្ងៃ', defaultVal: 2, unit: 'hours/week' },
+          { id: 'eye_attend', name: 'ចុះវត្តមាន', defaultVal: 10, unit: 'mins/day' },
+          { id: 'eye_prep_area', name: 'រៀបចំផ្នែកមុនធ្វើការ', defaultVal: 20, unit: 'mins/day' },
+          { id: 'eye_student_guide', name: 'ប្រជុំបែងចែក ណែនាំនិស្សិតចុះកម្មសិក្សា', defaultVal: 8, unit: 'hours/year' },
+          { id: 'eye_ho2_entry', name: 'បញ្ជូលប្រព័ន្ធ HO2', defaultVal: 15, unit: 'hours/month' },
+          { id: 'eye_triage_check', name: 'ពិនិត្យវត្តមានបុគ្គលិកផ្នែក OPD Triage + Register', defaultVal: 20, unit: 'mins/day' },
+          { id: 'eye_pmrs', name: 'រៀបចំពិនិត្យឯកសារ PMRS', defaultVal: 30, unit: 'mins/day' },
+          { id: 'eye_stock_rep', name: 'Report ស្ដុកប្រចាំថ្ងៃ', defaultVal: 30, unit: 'mins/day' },
+          { id: 'eye_receipt_rep', name: 'Report បង្កាន់ដៃបង់ប្រាក់', defaultVal: 3, unit: 'hours/month' },
+          { id: 'eye_inv_rep', name: 'Report សារពើភ័ណ្ឌប្រចាំត្រីមាស', defaultVal: 12, unit: 'hours/year' },
+          { id: 'eye_ho2_rep', name: 'Report HO2', defaultVal: 1, unit: 'hours/month' },
+          { id: 'eye_exempt_rep', name: 'Report លើកលែងថ្លៃសេវា OPD', defaultVal: 0.5, unit: 'hours/month' }
+        ]
+      },
+
+      '005. General Medicine': {
+        name: '005. ផ្នែកជំងឺទូទៅសម្រាកពេទ្យ (General Medicine - IPD)',
+        core: [
+          { id: 'gm_ref_rh', name: 'បញ្ជូនជំងឺទៅ RH', defaultVal: 120, unit: 'min/patient' },
+          { id: 'gm_get_hc', name: 'យកជំងឺពី HC មកមន្ទីរពេទ្យ', defaultVal: 60, unit: 'min/patient' },
+          { id: 'gm_ref_pp', name: 'បញ្ជូនទៅ ភ្នំពេញ', defaultVal: 360, unit: 'min/patient' },
+          { id: 'gm_discharge_doc', name: 'រៀបចំឯកសាបញ្ជូនអ្នកជំងឺចេញ', defaultVal: 30, unit: 'min/patient' },
+          { id: 'gm_ward_rounds', name: 'ពិនិត្យ និងតាមដានអ្នកជំងឺតាមបន្ទប់ (Rounds)', defaultVal: 20, unit: 'min/patient' }
+        ],
+        cas: [],
+        ias: [
+          { id: 'gm_attend', name: 'ចុះវត្តមាន', defaultVal: 7, unit: 'mins/day' },
+          { id: 'gm_unit_meeting', name: 'ប្រជុំក្នុងផ្នែកប្រចាំខែ', defaultVal: 1, unit: 'hours/month' },
+          { id: 'gm_prep_duty', name: 'រៀបចំសំភារៈបន្ទប់ធ្វើការ (ថ្ងៃយាម)', defaultVal: 37.2, unit: 'mins/day' },
+          { id: 'gm_ho2_daily', name: 'បញ្ចូលរបាយការណ៍ HO2ប្រចាំថ្ងៃ', defaultVal: 6.2, unit: 'mins/day' },
+          { id: 'gm_ipd_educate', name: 'អប់រំអ្នកជំងឺតាមបន្ទប់សម្រាក IPD', defaultVal: 6.2, unit: 'mins/day' },
+          { id: 'gm_ncd_educate', name: 'អប់រំអ្នកជំងឺNCD ប្រចាំថ្ងៃ', defaultVal: 6.2, unit: 'mins/day' },
+          { id: 'gm_ncd_hep_rep', name: 'Report NCD+Hepatite', defaultVal: 55.8, unit: 'mins/day' },
+          { id: 'gm_mission', name: 'ចូលរួមប្រជុំ បេសកម្ម ផ្សេងៗ នៅតាមបណ្ដាលខេត្ត រាជធានី', defaultVal: 20, unit: 'days/year' }
+        ]
+      },
+
+      '006. Pediatrics': {
+        name: '006. ផ្នែកជំងឺកុមារ (Pediatrics)',
+        core: [
+          { id: 'ped_ref_rh', name: 'បញ្ជូនជំងឺទៅ RH', defaultVal: 120, unit: 'min/patient' },
+          { id: 'ped_get_hc', name: 'យកជំងឺពី HC មកមន្ទីរពេទ្យ', defaultVal: 60, unit: 'min/patient' },
+          { id: 'ped_care', name: 'ពិនិត្យ និងព្យាបាលជំងឺកុមារទូទៅ', defaultVal: 25, unit: 'min/patient' },
+          { id: 'ped_sam', name: 'ថែទាំកុមារកង្វះអាហារូបត្ថម្ភស្រួចស្រាវ (SAM)', defaultVal: 45, unit: 'min/patient' }
+        ],
+        cas: [],
+        ias: [
+          { id: 'ped_medicine_pack', name: 'ធ្វើបង់ថ្នាំ', defaultVal: 60, unit: 'mins/day' },
+          { id: 'ped_attend', name: 'ចុះវត្តមាន', defaultVal: 5, unit: 'mins/day' },
+          { id: 'ped_equipment_req', name: 'បើកសំភារៈ បរិក្ខាពេទ្យ', defaultVal: 1, unit: 'hours/month' },
+          { id: 'ped_medicine_prep', name: 'រៀបចំបើកថ្នាំ', defaultVal: 60, unit: 'mins/day' },
+          { id: 'ped_info_phd', name: 'ទទួលពត៌មាន អប់រំសុខភាពកុមារ', defaultVal: 1, unit: 'hours/month' },
+          { id: 'ped_hygiene_edu', name: 'អប់រំ មាតាបិតា ពីអនាម័យ កុមារ', defaultVal: 15, unit: 'mins/day' },
+          { id: 'ped_room_prep', name: 'រៀបចំកន្លែងធ្វើការ (មុនចូល ក្រោយចេញ ពីធ្វើការ)', defaultVal: 30, unit: 'mins/day' },
+          { id: 'ped_monthly_meet', name: 'ប្រជុំប្រចាំខែ (ប្រជុំផ្នែក)', defaultVal: 1, unit: 'hours/month' },
+          { id: 'ped_census_rep', name: 'Report ចំនួនអ្នកជំងឺសម្រាក (ចេញ ចូល និង នៅសល់)', defaultVal: 1, unit: 'hours/week' },
+          { id: 'ped_sam_meeting', name: 'ប្រជុំផ្សេងៗ ៖ ស្ដីពីការថែរទាំកុមារកង្វះអាហារូបត្ថម្ភ ស្រួចស្រាវធ្ងន់ធ្ងរ', defaultVal: 5, unit: 'days/month' }
+        ]
+      },
+
+      '007. GYOB': {
+        name: '007. ផ្នែកសម្ភព និងរោគស្រ្តី (GYOB)',
+        core: [
+          { id: 'gyn_delivery', name: 'ការសម្រាលកូនធម្មតា (Normal Delivery)', defaultVal: 240, unit: 'min/patient' },
+          { id: 'gyn_eenc', name: 'ការថែទាំទារកទើបកើតភ្លាមៗ (EENC)', defaultVal: 60, unit: 'min/patient' },
+          { id: 'gyn_get_hc', name: 'យកជំងឺពី HC មកមន្ទីរពេទ្យ', defaultVal: 60, unit: 'min/patient' },
+          { id: 'gyn_ref_rh', name: 'បញ្ជូនជំងឺទៅ RH', defaultVal: 120, unit: 'min/patient' },
+          { id: 'gyn_ref_pp', name: 'បញ្ជូនទៅ ភ្នំពេញ', defaultVal: 360, unit: 'min/patient' }
+        ],
+        cas: [],
+        ias: [
+          { id: 'gyn_attend', name: 'ចុះវត្តមាន', defaultVal: 5, unit: 'mins/day' },
+          { id: 'gyn_maternal_audit', name: 'ចូលរួមប្រជុំអង្កេត មរណាមាតា', defaultVal: 1, unit: 'days/year' },
+          { id: 'gyn_supplies_add', name: 'ស្នើសុំសំភារៈបរិក្ខាបន្ថែម', defaultVal: 0.5, unit: 'hours/month' },
+          { id: 'gyn_supplies_check', name: 'ពិនិត្យសំភារៈប្រើប្រាស់ប្រចាំថ្ងៃ', defaultVal: 0.5, unit: 'hours/month' },
+          { id: 'gyn_mission', name: 'ចូលរួមប្រជុំ បេសកម្ម ផ្សេងៗ នៅតាមបណ្ដាលខេត្ត រាជធានី', defaultVal: 13, unit: 'days/year' },
+          { id: 'gyn_daily_rep', name: 'Report ប្រចាំថ្ងៃ', defaultVal: 10, unit: 'mins/day' }
+        ]
+      },
+
+      '008. Surgery': {
+        name: '008. ផ្នែកវះកាត់ និងក្រោយវះកាត់ (Surgery Department)',
+        core: [
+          { id: 'surg_major', name: 'ការវះកាត់ធំ (Major Surgery)', defaultVal: 180, unit: 'min/patient' },
+          { id: 'surg_minor', name: 'ការវះកាត់តូច (Minor Surgery)', defaultVal: 45, unit: 'min/patient' },
+          { id: 'surg_anesthesia', name: 'ការសណ្ដំ និងតាមដាន Anesthesia', defaultVal: 120, unit: 'min/patient' },
+          { id: 'surg_postop', name: 'ការថែទាំក្រោយវះកាត់ Post-op Recovery', defaultVal: 60, unit: 'min/patient' },
+          { id: 'surg_get_hc', name: 'យកជំងឺពី HC មកមន្ទីរពេទ្យ', defaultVal: 60, unit: 'min/patient' },
+          { id: 'surg_ref_rh', name: 'បញ្ជូនជំងឺទៅ RH', defaultVal: 120, unit: 'min/patient' },
+          { id: 'surg_ref_pp', name: 'បញ្ជូនទៅ ភ្នំពេញ', defaultVal: 360, unit: 'min/patient' }
+        ],
+        cas: [],
+        ias: [
+          { id: 'surg_medicine_prep', name: 'ធ្វើបុកថ្នាំប្រចាំថ្ងៃ', defaultVal: 60, unit: 'mins/day' },
+          { id: 'surg_pharmacy_get', name: 'បើកថ្នាំនៅឱសថស្ថាន', defaultVal: 25, unit: 'mins/day' },
+          { id: 'surg_roster', name: 'តារាងវេនយាមបុគ្គលិកប្រចាំ', defaultVal: 30, unit: 'mins/day' },
+          { id: 'surg_daily_duty_rep', name: 'ធ្វើរបាយការណ៍យាមប្រចាំថ្ងៃ', defaultVal: 30, unit: 'mins/day' },
+          { id: 'surg_attend', name: 'ចុះវត្តមាន', defaultVal: 15, unit: 'mins/day' },
+          { id: 'surg_staff_superv', name: 'ពិនិត្យមើលការងាររបស់បុគ្គលិក', defaultVal: 30, unit: 'mins/day' },
+          { id: 'surg_folding', name: 'បត់សំលៀកបំពាក់វះកាត់ និងក្រណាត់គ្រប', defaultVal: 45, unit: 'mins/day' },
+          { id: 'surg_sterile_check', name: 'ពិនិត្យសំភារៈ និងស្ដេរីល', defaultVal: 10, unit: 'mins/day' },
+          { id: 'surg_sterile_gauze', name: 'ស្ដេរីលសំភារៈ និងកំប្រេស', defaultVal: 7.5, unit: 'mins/day' },
+          { id: 'surg_icu_check', name: 'ត្រួតពិនិត្យសំភារៈសង្រ្គោះបន្ទាន់ (SAMU+ICU Room)', defaultVal: 0.5, unit: 'hours/week' },
+          { id: 'surg_ipc_check', name: 'ត្រួតពិនិត្យ IPC ប្រចាំថ្ងៃ', defaultVal: 30, unit: 'mins/day' },
+          { id: 'surg_rep_monthly', name: 'Report ប្រចាំខែ', defaultVal: 30, unit: 'mins/day' }
+        ]
+      },
+
+      '009. CD/TB/HIV': {
+        name: '009. ផ្នែកជំងឺឆ្លង របេង និងអេដស៍ (CD/TB/HIV)',
+        core: [
+          { id: 'cd_tb_consult', name: 'ពិគ្រោះ និងតាមដានជំងឺរបេង TB', defaultVal: 20, unit: 'min/patient' },
+          { id: 'cd_hiv_consult', name: 'ពិគ្រោះ និងបើកថ្នាំ ARV / HIV', defaultVal: 25, unit: 'min/patient' },
+          { id: 'cd_get_hc', name: 'យកជំងឺពី HC មកមន្ទីរពេទ្យ', defaultVal: 60, unit: 'min/patient' }
+        ],
+        cas: [],
+        ias: [
+          { id: 'cd_medicine_order', name: 'ធ្វើបុងបើកថ្នាំប្រចាំថ្ងៃ', defaultVal: 6, unit: 'mins/day' },
+          { id: 'cd_roster', name: 'រៀបចំតារាងវេនយាមប្រចាំខែ', defaultVal: 0.25, unit: 'hours/month' },
+          { id: 'cd_attend', name: 'ចុះវត្តមាន', defaultVal: 15, unit: 'mins/day' },
+          { id: 'cd_feedback_box', name: 'តាមដានសំបុត្ររិះគន់កែលម្អ', defaultVal: 0.67, unit: 'hours/week' },
+          { id: 'cd_unit_meet', name: 'ប្រជុំក្នុងផ្នែក', defaultVal: 0.5, unit: 'hours/month' },
+          { id: 'cd_pharm_get', name: 'បើកឱសថប្រចាំថ្ងៃនៅ ឱសថស្ថាន', defaultVal: 25, unit: 'mins/day' },
+          { id: 'cd_ipc_eval', name: 'វាយតម្លៃ IPC គ្រប់ផ្នែក', defaultVal: 30, unit: 'mins/day' },
+          { id: 'cd_ipd_edu', name: 'អប់រំអ្នកជំងឺ IPD ប្រចាំថ្ងៃ', defaultVal: 6, unit: 'mins/day' },
+          { id: 'cd_inv_rep', name: 'Inventory Report ប្រចាំត្រីមាស', defaultVal: 4, unit: 'hours/year' },
+          { id: 'cd_rep_monthly', name: 'Report ប្រចាំខែ', defaultVal: 0.5, unit: 'hours/month' },
+          { id: 'cd_supplies_req', name: 'Report ស្នើសុំសំភារៈ', defaultVal: 0.25, unit: 'hours/month' },
+          { id: 'cd_ho2_daily', name: 'Report HO2 ប្រចាំថ្ងៃ', defaultVal: 40, unit: 'mins/day' }
+        ]
+      },
+
+      '010. Laboratory': {
+        name: '010. ផ្នែកមន្ទីរពិសោធន៍ (Laboratory)',
+        core: [
+          { id: 'lab_blood_draw', name: 'បូមឈាមអ្នកជំងឺ OPD+អ្នកផ្ដល់ឈាម', defaultVal: 3, unit: 'min/patient' },
+          { id: 'lab_camlis_entry', name: 'បញ្ចូលលិទ្ធផលក្នុងប្រព័ន្ធ CamLIS និងPrintលទិ្ធផល', defaultVal: 3, unit: 'min/patient' },
+          { id: 'lab_cbc', name: 'ពិនិត្យវិភាគឈាម CBC / Hematology', defaultVal: 10, unit: 'min/test' },
+          { id: 'lab_biochem', name: 'ពិនិត្យជីវគីមីឈាម Biochemistry', defaultVal: 15, unit: 'min/test' },
+          { id: 'lab_tb_afb', name: 'ពិនិត្យស្លេស្មរកមេរោគរបេង AFB / GeneXpert', defaultVal: 25, unit: 'min/test' }
+        ],
+        cas: [],
+        ias: [
+          { id: 'lab_machine_run', name: 'Run ម៉ាស៊ីន និងរៀបចំប្រចាំថ្ងៃ', defaultVal: 15, unit: 'mins/day' },
+          { id: 'lab_roster', name: 'ធ្វើតារាងវេនយាម', defaultVal: 0.5, unit: 'hours/month' },
+          { id: 'lab_stock_ledger', name: 'បញ្ចូនសាលកប័ត្រឃ្លាំង', defaultVal: 6, unit: 'hours/month' },
+          { id: 'lab_attend', name: 'ចុះវត្តមាន', defaultVal: 10, unit: 'mins/day' },
+          { id: 'lab_supplies_order', name: 'រៀបចំ ស្នើសុំ និងបើកសំភារៈ (១ខែ ២ដង)', defaultVal: 12, unit: 'hours/month' },
+          { id: 'lab_quarter_rep', name: 'Report សម្ភារៈប្រចាំត្រីមាស', defaultVal: 8, unit: 'hours/year' },
+          { id: 'lab_hep_rep', name: 'Report Hepatite', defaultVal: 8, unit: 'hours/month' },
+          { id: 'lab_hiv_rep', name: 'Report HIV (១ត្រីមាសម្ដង)', defaultVal: 8, unit: 'hours/year' },
+          { id: 'lab_ho2_rep', name: 'Report HO2', defaultVal: 0.5, unit: 'hours/month' },
+          { id: 'lab_tb_rep', name: 'Report TB', defaultVal: 4, unit: 'hours/month' }
+        ]
+      },
+
+      '011. Pharmacy': {
+        name: '011. ផ្នែកឱសថស្ថាន (Pharmacy Department)',
+        core: [
+          { id: 'pharm_dispense_opd', name: 'ចែកឱសថ និងពន្យល់ការប្រើប្រាស់ជូនអ្នកជំងឺក្រៅ', defaultVal: 5, unit: 'min/patient' },
+          { id: 'pharm_dispense_ipd', name: 'រៀបចំ និងចែកចាយឱសថតាមផ្នែកសម្រាកពេទ្យ', defaultVal: 10, unit: 'min/ward' }
+        ],
+        cas: [],
+        ias: [
+          { id: 'pharm_dept_dispense', name: 'បើកឱសថតាមផ្នែកប្រចាំថ្ងៃ', defaultVal: 93.75, unit: 'mins/day' },
+          { id: 'pharm_next_day_prep', name: 'រៀបចំឱសថប្រចាំថ្ងៃដើម្បីរៀបចំឲ្យអ្នកជំងឺនៅថ្ងៃបន្ទាប់', defaultVal: 135, unit: 'mins/day' },
+          { id: 'pharm_prep_area', name: 'រៀបចំកន្លែងមុនចូលធ្វើការ', defaultVal: 7.5, unit: 'mins/day' },
+          { id: 'pharm_stock_in', name: 'រៀបចំឱសថចូលឃ្លាំងប្រចាំខែ', defaultVal: 1, unit: 'hours/month' },
+          { id: 'pharm_duty_additional', name: 'បើកថ្នាំបន្ថែមប្រចាំថ្ងៃតាមផ្នែកទាំង ៥ (វេនយាម)', defaultVal: 18.75, unit: 'mins/day' },
+          { id: 'pharm_duty_summary', name: 'សម្រង់ឱសថប្រចាំថ្ងៃ (វេនយាម)', defaultVal: 30, unit: 'mins/day' },
+          { id: 'pharm_bin_card', name: 'សាលកបត្រឃ្លាំង (២ដង/ខែ)', defaultVal: 48, unit: 'hours/month' },
+          { id: 'pharm_duty_art', name: 'សម្រង់ARTប្រចាំថ្ងៃ (វេនយាម)', defaultVal: 1.25, unit: 'mins/day' },
+          { id: 'pharm_attend', name: 'ចុះវត្តមាន', defaultVal: 10, unit: 'mins/day' },
+          { id: 'pharm_money_rep', name: 'Reportទឹកប្រាក់ឱសថប្រចាំខែ', defaultVal: 0.67, unit: 'hours/month' },
+          { id: 'pharm_order_rep', name: 'Report ស្នើសុំឱសថបន្ថែមប្រចាំខែ', defaultVal: 0.33, unit: 'hours/month' },
+          { id: 'pharm_hep_rep', name: 'Report Hepatic', defaultVal: 0.25, unit: 'hours/month' },
+          { id: 'pharm_hiv_rep', name: 'Report HIV(ARV)', defaultVal: 4, unit: 'hours/year' },
+          { id: 'pharm_expired_rep', name: 'Reportឱសថហួសសុពលភាព( ១ឆមាសម្ដង)', defaultVal: 1, unit: 'hours/year' }
+        ]
+      },
+
+      '012. Oral Health': {
+        name: '012. ផ្នែកសុខភាពមាត់ធ្មេញ (Oral Health & Dental)',
+        core: [
+          { id: 'dent_consult', name: 'ពិគ្រោះ និងពិនិត្យជំងឺមាត់ធ្មេញ', defaultVal: 15, unit: 'min/patient' },
+          { id: 'dent_extract', name: 'ដកធ្មេញ (Tooth Extraction)', defaultVal: 25, unit: 'min/patient' },
+          { id: 'dent_filling', name: 'ប៉ះធ្មេញ (Restoration / Filling)', defaultVal: 35, unit: 'min/patient' },
+          { id: 'dent_scaling', name: 'កោសកំបោរធ្មេញ (Scaling)', defaultVal: 30, unit: 'min/patient' },
+          { id: 'dent_get_hc', name: 'យកជំងឺពី HC មកមន្ទីរពេទ្យ', defaultVal: 60, unit: 'min/patient' }
         ],
         cas: [
-          { id: 'eye_educate', name: 'ការអប់រំសុខភាពភ្នែក និងការបន្តក់ថ្នាំដល់អ្នកជំងឺ', defaultCas: 20 },
-          { id: 'eye_clean', name: 'ការសម្អាត និងថែទាំឧបករណ៍ជំនាញភ្នែក', defaultCas: 25 }
+          { id: 'dent_attend_cas', name: 'ចុះវត្តមាន', defaultVal: 10, unit: 'mins/day' }
         ],
         ias: [
-          { id: 'eye_reg', name: 'ការកត់ត្រាបញ្ជីជំងឺភ្នែក និងរបាយការណ៍ HO2 ភ្នែក', defaultIas: 2.0 }
+          { id: 'dent_wash_tools', name: 'លាងសំអាតសម្ភារៈ', defaultVal: 60, unit: 'mins/day' },
+          { id: 'dent_attend', name: 'ចុះវត្តមាន', defaultVal: 10, unit: 'mins/day' },
+          { id: 'dent_sterile_prep', name: 'រៀបចំ និងយកសំភារៈទៅ Sterile', defaultVal: 30, unit: 'mins/day' },
+          { id: 'dent_daily_rep', name: 'Report ប្រចាំថ្ងៃ', defaultVal: 10, unit: 'mins/day' },
+          { id: 'dent_ho2_rep', name: 'Report HO2', defaultVal: 0.33, unit: 'hours/month' }
+        ]
+      },
+
+      '013. Medical Imaging': {
+        name: '013. ផ្នែករូបភាពវេជ្ជសាស្រ្ត (Medical Imaging - X-Ray/Echo)',
+        core: [
+          { id: 'img_xray', name: 'ថតកាំរស្មីអ៊ិច X-Ray', defaultVal: 15, unit: 'min/patient' },
+          { id: 'img_ultrasound', name: 'ពិនិត្យអេកូសាស្ត្រ Ultrasound (ECO)', defaultVal: 20, unit: 'min/patient' },
+          { id: 'img_ecg', name: 'វាស់ចង្វាក់បេះដូង ECG', defaultVal: 15, unit: 'min/patient' }
+        ],
+        cas: [],
+        ias: [
+          { id: 'img_monthly_rep', name: 'របាយការណ៍ប្រចាំខែ', defaultVal: 45, unit: 'hours/month' },
+          { id: 'img_attend', name: 'ចុះវត្តមាន', defaultVal: 12, unit: 'mins/day' },
+          { id: 'img_daily_rep', name: 'របាយប្រចាំថ្ងៃ (អ្នកយាម)', defaultVal: 7, unit: 'mins/day' },
+          { id: 'img_room_prep', name: 'រៀបចំបន្ទប់ ECO+ECG', defaultVal: 10, unit: 'mins/day' }
+        ]
+      },
+
+      '014. Administration': {
+        name: '014. ផ្នែករដ្ឋបាល-គណនេយ្យ-ហិរញ្ញវត្ថុ-ផែនការប្រព័ន្ធព័ត៌មាន (Admin & Finance)',
+        core: [
+          { id: 'adm_reg_bill', name: 'ចុះឈ្មោះ និងគិតលុយអ្នកជំងឺ (Admission & Billing)', defaultVal: 5, unit: 'min/patient' }
+        ],
+        cas: [],
+        ias: [
+          { id: 'adm_revenue_daily', name: 'បញ្ចូលរបាយការណ៍ចំណូលប្រចាំថ្ងៃ', defaultVal: 15, unit: 'mins/day' },
+          { id: 'adm_paper_rep_phd', name: 'ធ្វើរបាយការណ៍ទៅមន្ទីរ (ទម្រង់ក្រដាស)', defaultVal: 1, unit: 'hours/month' },
+          { id: 'adm_his_entry', name: 'បញ្ចូលរបាយណ៍ការក្រសួង (HIS)', defaultVal: 1, unit: 'hours/month' },
+          { id: 'adm_it_troubleshoot', name: 'ដោះស្រាយបញ្ហាប្រព័ន្ធកុំព្យូទ័រ', defaultVal: 2, unit: 'hours/week' },
+          { id: 'adm_attend_check', name: 'ពិនិត្យវត្តមានបុគ្គលិក ក្នុងបញ្ជី', defaultVal: 6, unit: 'mins/day' },
+          { id: 'adm_meeting_minutes', name: 'រៀបចំឯកសារឯកសារប្រជុំ និង កំណត់ហេតុប្រជុំ', defaultVal: 30, unit: 'mins/day' },
+          { id: 'adm_request_review', name: 'ពិនិត្យ ឬ រៀបចំឯកសារ ដែលបានដាក់ស្នើ', defaultVal: 30, unit: 'mins/day' },
+          { id: 'adm_ho2_entry', name: 'បញ្ចូលពត៌មាន HO2', defaultVal: 30, unit: 'mins/day' },
+          { id: 'adm_od_phd_audit', name: 'ត្រួតពិនិត្យរបាយការណ៍ទៅ OD និងមន្ទីរ ដើម្បីផ្ទៀតផ្ទាត់', defaultVal: 30, unit: 'mins/day' },
+          { id: 'adm_bank_reconcile', name: 'រៀបចំបញ្ជីតាមដានប្រាក់ផ្ញើធនាគារប្រចាំខែ', defaultVal: 2, unit: 'hours/week' },
+          { id: 'adm_gov_rep', name: 'ធ្វើរបាយការណ៍ផ្ដល់សេវាសុខាភិបាលជូនទៅសាលាខេត្ត', defaultVal: 15, unit: 'mins/day' },
+          { id: 'adm_cash_ledger', name: 'រៀបចំបញ្ជីបេឡាសាច់ប្រាក់ហិរញ្ញប្បទានចំណូល ចំណាយប្រចាំខែ', defaultVal: 2, unit: 'hours/month' },
+          { id: 'adm_fm20_entry', name: 'បញ្ចូរបាយការណ៍ចំណូលចំណាយ និងសមតុល្យសាច់ប្រាក់រៀងរាល់ថ្ងៃ (FM20)', defaultVal: 2, unit: 'mins/day' },
+          { id: 'adm_heqip_docs', name: 'រៀបចំឯកសារចំណូលចំណាយ H-EQIP', defaultVal: 1, unit: 'hours/week' },
+          { id: 'adm_satisfaction_survey', name: 'ប្រមូលកម្រងសំនួរការពេញចិត្តរបស់អតិថិជន', defaultVal: 30, unit: 'hours/month' }
+        ]
+      },
+
+      '015. Kitchen': {
+        name: '015. ផ្នែកដាំស្ល (Kitchen / Cooking)',
+        core: [],
+        cas: [],
+        ias: [
+          { id: 'cook_kitchen_prep', name: 'រៀបចំទុកដាក់សម្ភារៈផ្ទះបាយ', defaultVal: 30, unit: 'mins/day' },
+          { id: 'cook_market_buy', name: 'ទៅផ្សាទិញម្ហូប', defaultVal: 90, unit: 'mins/day' },
+          { id: 'cook_patient_meal', name: 'រៀបចំដាំស្ល និងដាំស្លជូនអ្នកជំងឺ (១ថ្ងៃ ២ដង)', defaultVal: 240, unit: 'mins/day' },
+          { id: 'cook_distribute_meal', name: 'ចែកបាយម្ហូប ដល់អ្នកជំងឺ (១ថ្ងៃ ២ដង)', defaultVal: 120, unit: 'mins/day' }
+        ]
+      },
+
+      '016. Cleaning': {
+        name: '016. កម្មករសំអាត (Cleaning & Hygiene)',
+        core: [
+          { id: 'clean_corpse_trans', name: 'ដឹកសពទៅផ្ទះ', defaultVal: 360, unit: 'min/patient' }
+        ],
+        cas: [],
+        ias: [
+          { id: 'clean_shoes', name: 'សំអាតស្បែកជើងសម្រាប់ពាក់សម្រាល', defaultVal: 0.5, unit: 'hours/week' },
+          { id: 'clean_tables', name: 'ជូតសម្អាតតុទូកៅអី', defaultVal: 20, unit: 'mins/day' },
+          { id: 'clean_ceiling', name: 'បោសសំអាតតាមពិដាន', defaultVal: 0.5, unit: 'hours/week' },
+          { id: 'clean_garbage_dispose', name: 'យកសម្រាមទៅបោះចោល', defaultVal: 60, unit: 'mins/day' },
+          { id: 'clean_attend', name: 'ចុះវត្តមាន', defaultVal: 10, unit: 'mins/day' },
+          { id: 'clean_room_prep', name: 'សំអាតបន្ទប់សម្រាក រង់ចាំ +បន្ទប់លាងរបួស', defaultVal: 30, unit: 'mins/day' },
+          { id: 'clean_incinerate', name: 'យកសម្រាប់ទៅដុតចោល (១អាទិត្យ៣ដង)', defaultVal: 3, unit: 'hours/week' },
+          { id: 'clean_toilet', name: 'សំអាតតាមបង្គន់អនាម័យ', defaultVal: 240, unit: 'mins/day' },
+          { id: 'clean_grounds', name: 'សំអាតទីធ្លា', defaultVal: 90, unit: 'mins/day' },
+          { id: 'clean_curtains', name: 'បោកសំអាតវ៉ាំងនន', defaultVal: 3, unit: 'hours/month' }
+        ]
+      },
+
+      '017. Security': {
+        name: '017. សន្តិសុខ (Security)',
+        core: [],
+        cas: [],
+        ias: [
+          { id: 'sec_patrol', name: 'យាមល្បាត និងសម្រួលចរាចរណ៍ចេញ-ចូល', defaultVal: 360, unit: 'mins/day' },
+          { id: 'sec_safety_check', name: 'ត្រួតពិនិត្យសណ្តាប់ធ្នាប់ និងសុវត្ថិភាពទូទៅ', defaultVal: 120, unit: 'mins/day' },
+          { id: 'sec_attend', name: 'ចុះវត្តមាន', defaultVal: 10, unit: 'mins/day' }
+        ]
+      },
+
+      '018. Ambulance': {
+        name: '018. រថយន្តសង្គ្រោះ (Ambulance)',
+        core: [
+          { id: 'amb_ref_rh', name: 'បញ្ជូនជំងឺទៅ RH', defaultVal: 120, unit: 'min/patient' },
+          { id: 'amb_get_hc', name: 'យកជំងឺពី HC មកមន្ទីរពេទ្យ', defaultVal: 60, unit: 'min/patient' },
+          { id: 'amb_ref_pp', name: 'បញ្ជូនទៅ ភ្នំពេញ', defaultVal: 360, unit: 'min/patient' },
+          { id: 'amb_corpse_trans', name: 'ដឹកសពទៅផ្ទះ', defaultVal: 360, unit: 'min/patient' }
+        ],
+        cas: [],
+        ias: [
+          { id: 'amb_attend', name: 'ចុះវត្តមាន', defaultVal: 12, unit: 'mins/day' },
+          { id: 'amb_maintenance', name: 'ថែទាំរថយន្តសង្រ្គោះប្រចាំថ្ងៃ', defaultVal: 15, unit: 'mins/day' },
+          { id: 'amb_mission', name: 'ចូលរួមប្រជុំ បេសកម្ម ផ្សេងៗ នៅតាមបណ្ដាលខេត្ត រាជធានី', defaultVal: 9, unit: 'days/year' },
+          { id: 'amb_incinerate', name: 'យកសម្រាប់ទៅដុតចោល (១អាទិត្យ៣ដង)', defaultVal: 3, unit: 'hours/week' }
         ]
       }
     };
@@ -474,6 +761,9 @@
     // Initialize on page load
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('interviewDate').valueAsDate = new Date();
+      if (!localStorage.getItem(STORAGE_GSHEET_URL)) {
+        localStorage.setItem(STORAGE_GSHEET_URL, DEFAULT_GSHEET_URL);
+      }
       calculateAWT();
       updateDepartmentQuestions();
       updateResponseCount();
@@ -483,85 +773,91 @@
 
     function updateDepartmentQuestions() {
       const dept = document.getElementById('department').value;
-      const tpl = DEPT_TEMPLATES[dept] || DEPT_TEMPLATES['OPD General'];
+      const tpl = WISN_DEPARTMENTS[dept] || WISN_DEPARTMENTS['003. OPD'];
       document.getElementById('current-dept-label').textContent = 'ផ្នែក៖ ' + tpl.name;
 
       let html = '';
 
-      // Tier 1: Core Activities
-      html += `
-        <div class="space-y-3">
-          <div class="flex items-center gap-2">
-            <span class="px-2 py-0.5 rounded-md bg-teal-100 text-teal-800 text-[11px] font-bold">កម្រិតទី ១</span>
-            <h3 class="text-xs sm:text-sm font-bold text-teal-900">ការងារស្នូលព្យាបាលលើអ្នកជំងឺ (Core Activities) [នាទី/ករណី]</h3>
-          </div>
-          <div class="space-y-2">
-      `;
-      tpl.core.forEach((task, idx) => {
+      // Tier 1: Core Activities (Related with Service Statistics)
+      if (tpl.core && tpl.core.length > 0) {
         html += `
-          <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div class="flex-1">
-              <div class="text-xs font-bold text-slate-800">${task.name}</div>
+          <div class="space-y-3">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded-md bg-teal-100 text-teal-800 text-[11px] font-bold">កម្រិតទី ១</span>
+              <h3 class="text-xs sm:text-sm font-bold text-teal-900">ការងារស្នូលព្យាបាល/ផ្ដល់សេវា (Activities Related With Service Statistics) [នាទី/ករណី]</h3>
             </div>
-            <div class="flex items-center gap-2 shrink-0">
-              <span class="text-xs text-slate-500">រយៈពេលមធ្យម៖</span>
-              <input type="number" id="core_${task.id}" value="${task.defaultMin}" min="1" max="480" class="w-20 px-3 py-1.5 rounded-xl border border-slate-300 text-xs font-bold text-right text-teal-900 focus:border-teal-500">
-              <span class="text-xs font-semibold text-slate-600">នាទី/ករណី</span>
-            </div>
-          </div>
+            <div class="space-y-2">
         `;
-      });
-      html += `</div></div>`;
+        tpl.core.forEach((task) => {
+          html += `
+            <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex-1">
+                <div class="text-xs font-bold text-slate-800">${task.name}</div>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <span class="text-xs text-slate-500">Service Standard:</span>
+                <input type="number" id="core_${task.id}" value="${task.defaultVal}" min="0" max="600" class="w-20 px-3 py-1.5 rounded-xl border border-slate-300 text-xs font-bold text-right text-teal-900 focus:border-teal-500">
+                <span class="text-xs font-semibold text-slate-600">${task.unit}</span>
+              </div>
+            </div>
+          `;
+        });
+        html += `</div></div>`;
+      }
 
-      // Tier 2: Support Activities (CAS)
-      html += `
-        <div class="space-y-3 pt-2">
-          <div class="flex items-center gap-2">
-            <span class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[11px] font-bold">កម្រិតទី ២</span>
-            <h3 class="text-xs sm:text-sm font-bold text-amber-900">ការងារគាំទ្ររួមក្រុម (Support Activities - CAS) [% នៃម៉ោងការងារ]</h3>
-          </div>
-          <div class="space-y-2">
-      `;
-      tpl.cas.forEach((task) => {
+      // Tier 2: Category Allowance Standard (CAS)
+      if (tpl.cas && tpl.cas.length > 0) {
         html += `
-          <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div class="flex-1">
-              <div class="text-xs font-bold text-slate-800">${task.name}</div>
+          <div class="space-y-3 pt-2">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[11px] font-bold">កម្រិតទី ២</span>
+              <h3 class="text-xs sm:text-sm font-bold text-amber-900">ការងារគាំទ្ររួមក្រុម (Category Allowance Standard - CAS)</h3>
             </div>
-            <div class="flex items-center gap-2 shrink-0">
-              <span class="text-xs text-slate-500">សមាមាត្រពេលវេលា៖</span>
-              <input type="number" id="cas_${task.id}" value="${task.defaultCas}" min="0" max="100" class="w-20 px-3 py-1.5 rounded-xl border border-slate-300 text-xs font-bold text-right text-amber-900 focus:border-teal-500">
-              <span class="text-xs font-semibold text-slate-600">%</span>
-            </div>
-          </div>
+            <div class="space-y-2">
         `;
-      });
-      html += `</div></div>`;
+        tpl.cas.forEach((task) => {
+          html += `
+            <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex-1">
+                <div class="text-xs font-bold text-slate-800">${task.name}</div>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <span class="text-xs text-slate-500">Workload:</span>
+                <input type="number" step="0.5" id="cas_${task.id}" value="${task.defaultVal}" min="0" class="w-20 px-3 py-1.5 rounded-xl border border-slate-300 text-xs font-bold text-right text-amber-900 focus:border-teal-500">
+                <span class="text-xs font-semibold text-slate-600">${task.unit}</span>
+              </div>
+            </div>
+          `;
+        });
+        html += `</div></div>`;
+      }
 
-      // Tier 3: Admin Activities (IAS)
-      html += `
-        <div class="space-y-3 pt-2">
-          <div class="flex items-center gap-2">
-            <span class="px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-800 text-[11px] font-bold">កម្រិតទី ៣</span>
-            <h3 class="text-xs sm:text-sm font-bold text-indigo-900">ការងាររដ្ឋបាល និងឯកសារ (Individual Admin - IAS) [ម៉ោង/សប្តាហ៍]</h3>
-          </div>
-          <div class="space-y-2">
-      `;
-      tpl.ias.forEach((task) => {
+      // Tier 3: Individual Allowance Standard (IAS)
+      if (tpl.ias && tpl.ias.length > 0) {
         html += `
-          <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div class="flex-1">
-              <div class="text-xs font-bold text-slate-800">${task.name}</div>
+          <div class="space-y-3 pt-2">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-800 text-[11px] font-bold">កម្រិតទី ៣</span>
+              <h3 class="text-xs sm:text-sm font-bold text-indigo-900">ការងាររដ្ឋបាល និងឯកសារ (Individual Allowance Standard - IAS)</h3>
             </div>
-            <div class="flex items-center gap-2 shrink-0">
-              <span class="text-xs text-slate-500">ចំណាយពេល៖</span>
-              <input type="number" step="0.5" id="ias_${task.id}" value="${task.defaultIas}" min="0" max="40" class="w-20 px-3 py-1.5 rounded-xl border border-slate-300 text-xs font-bold text-right text-indigo-900 focus:border-teal-500">
-              <span class="text-xs font-semibold text-slate-600">ម៉ោង/សប្តាហ៍</span>
-            </div>
-          </div>
+            <div class="space-y-2">
         `;
-      });
-      html += `</div></div>`;
+        tpl.ias.forEach((task) => {
+          html += `
+            <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex-1">
+                <div class="text-xs font-bold text-slate-800">${task.name}</div>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <span class="text-xs text-slate-500">Workload:</span>
+                <input type="number" step="0.5" id="ias_${task.id}" value="${task.defaultVal}" min="0" class="w-20 px-3 py-1.5 rounded-xl border border-slate-300 text-xs font-bold text-right text-indigo-900 focus:border-teal-500">
+                <span class="text-xs font-semibold text-slate-600">${task.unit}</span>
+              </div>
+            </div>
+          `;
+        });
+        html += `</div></div>`;
+      }
 
       document.getElementById('dynamic-workload-container').innerHTML = html;
       lucide.createIcons();
@@ -570,12 +866,13 @@
     function addCustomTask() {
       const name = prompt('សូមបញ្ចូលឈ្មោះសកម្មភាពថ្មី៖');
       if (!name || !name.trim()) return;
-      const type = prompt('សូមជ្រើសរើសប្រភេទ៖ វាយ 1=ការងារស្នូល (នាទី), 2=ការងារគាំទ្រ (%), 3=ការងាររដ្ឋបាល (ម៉ោង/សប្តាហ៍)', '1');
-      let cat = 'core';
-      let unit = 'នាទី/ករណី';
+      const type = prompt('សូមជ្រើសរើសប្រភេទ៖ វាយ 1=ការងារស្នូល (នាទី), 2=ការងារគាំទ្រ CAS, 3=ការងាររដ្ឋបាល IAS', '3');
+      let cat = 'ias';
+      let unit = 'mins/day';
       let defVal = 15;
-      if (type === '2') { cat = 'cas'; unit = '%'; defVal = 20; }
-      if (type === '3') { cat = 'ias'; unit = 'ម៉ោង/សប្តាហ៍'; defVal = 2; }
+      if (type === '1') { cat = 'core'; unit = 'min/patient'; defVal = 15; }
+      if (type === '2') { cat = 'cas'; unit = 'hours/month'; defVal = 2; }
+      if (type === '3') { cat = 'ias'; unit = 'mins/day'; defVal = 15; }
 
       const id = 'cust_' + Date.now();
       customTasks.push({ id, name: name.trim(), category: cat, unit, val: defVal });
@@ -620,9 +917,11 @@
       const F = parseFloat(document.getElementById('awtSpecialLeave').value) || 0;
       const G = parseFloat(document.getElementById('awtTrainingDays').value) || 0;
 
-      const workingDaysYear = (A * 52) - (C + D + E + F + G);
+      const nonWorkingDays = C + D + E + F + G;
+      const workingDaysYear = (A * 52) - nonWorkingDays;
       const totalHoursYear = workingDaysYear * B;
 
+      document.getElementById('disp-non-working-days').textContent = nonWorkingDays;
       document.getElementById('disp-awt-days').textContent = Math.round(workingDaysYear);
       document.getElementById('disp-awt-hours').textContent = Math.round(totalHoursYear).toLocaleString();
     }
@@ -647,9 +946,7 @@
         gender: document.getElementById('gender').value,
         cadre: document.getElementById('cadre').value,
         department: document.getElementById('department').value,
-        hasSecondDept: document.getElementById('hasSecondDept').value,
         employmentStatus: document.getElementById('employmentStatus').value,
-        experience: document.getElementById('experience').value,
         awtDaysWeek: document.getElementById('awtDaysWeek').value,
         awtHoursDay: document.getElementById('awtHoursDay').value,
         awtAnnualLeave: document.getElementById('awtAnnualLeave').value,
@@ -672,19 +969,18 @@
       updateResponseCount();
 
       // 2. Attempt Google Sheet Cloud Sync
-      const gSheetUrl = localStorage.getItem(STORAGE_GSHEET_URL);
+      const gSheetUrl = localStorage.getItem(STORAGE_GSHEET_URL) || DEFAULT_GSHEET_URL;
       let syncSuccess = false;
 
       if (gSheetUrl && navigator.onLine) {
         try {
           await fetch(gSheetUrl, {
             method: 'POST',
-            mode: 'no-cors', // standard for Apps Script Webhooks
+            mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(responseObj)
           });
           syncSuccess = true;
-          // Mark as synced
           existing[0].syncedToGSheet = true;
           localStorage.setItem(STORAGE_RESPONSES, JSON.stringify(existing));
         } catch (err) {
@@ -736,23 +1032,20 @@
 
     // Google Sheet Sync Helpers
     function checkCloudSyncStatus() {
-      const url = localStorage.getItem(STORAGE_GSHEET_URL);
+      const url = localStorage.getItem(STORAGE_GSHEET_URL) || DEFAULT_GSHEET_URL;
       const badge = document.getElementById('sync-status-badge');
-      const alertBox = document.getElementById('cloud-alert-box');
 
       if (url && url.startsWith('http')) {
         badge.innerHTML = '🟢 Google Sheet: បានភ្ជាប់';
         badge.className = 'text-emerald-700 font-bold';
-        if (alertBox) alertBox.classList.add('hidden');
       } else {
         badge.innerHTML = '🟡 Google Sheet: មិនទាន់ភ្ជាប់';
         badge.className = 'text-amber-800 font-bold';
-        if (alertBox) alertBox.classList.remove('hidden');
       }
     }
 
     function openSyncModal() {
-      const url = localStorage.getItem(STORAGE_GSHEET_URL) || '';
+      const url = localStorage.getItem(STORAGE_GSHEET_URL) || DEFAULT_GSHEET_URL;
       document.getElementById('google-sheet-url').value = url;
       document.getElementById('modal-sync').classList.remove('hidden');
     }
@@ -762,7 +1055,7 @@
     }
 
     function saveGoogleSheetUrl() {
-      const url = document.getElementById('google-sheet-url').value.trim();
+      const url = document.getElementById('google-sheet-url').value.trim() || DEFAULT_GSHEET_URL;
       localStorage.setItem(STORAGE_GSHEET_URL, url);
       closeSyncModal();
       checkCloudSyncStatus();
@@ -867,7 +1160,7 @@
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.setAttribute('href', url);
-      link.setAttribute('download', `WISN_Survey_RH_Stung_Trang_${new Date().toISOString().split('T')[0]}.csv`);
+      link.setAttribute('download', `WISN_Survey_RH_${new Date().toISOString().split('T')[0]}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -875,12 +1168,7 @@
 
     // Sync all pending to Google Sheet
     async function syncAllToGoogleSheets() {
-      const gSheetUrl = localStorage.getItem(STORAGE_GSHEET_URL);
-      if (!gSheetUrl) {
-        alert('សូមភ្ជាប់ Link Google Sheet ជាមុនសិន!');
-        openSyncModal();
-        return;
-      }
+      const gSheetUrl = localStorage.getItem(STORAGE_GSHEET_URL) || DEFAULT_GSHEET_URL;
 
       const existing = JSON.parse(localStorage.getItem(STORAGE_RESPONSES) || '[]');
       let count = 0;
